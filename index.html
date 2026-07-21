@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Agent 與 CLI 入門｜產業AI人才培訓</title>
+<style>
+ :root{
+ --p1:#7c3aed; --p1b:#a855f7; --p2:#0891b2; --p2b:#22d3ee;
+ --p4:#16a34a; --p4b:#4ade80; --ink:#1f2937; --muted:#94a3b8; --line:#e5e7eb;
+ }
+ *{box-sizing:border-box; margin:0; padding:0}
+ body{
+ font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","PingFang TC","Microsoft JhengHei",Arial,sans-serif;
+ color:#e5e7eb; min-height:100vh;
+ background:
+ radial-gradient(1200px 600px at 15% 0%, rgba(124,58,237,.22), transparent 60%),
+ radial-gradient(1000px 600px at 100% 100%, rgba(22,163,74,.18), transparent 55%),
+ linear-gradient(135deg,#0f172a,#1e1b4b 55%,#0f172a);
+ display:flex; flex-direction:column; align-items:center; justify-content:center;
+ padding:6vh 6vw; gap:0;
+ }
+ .wrap{width:100%; max-width:960px}
+ .badge{display:inline-block; padding:7px 16px; border-radius:999px; font-weight:800; letter-spacing:1px;
+ background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.25); font-size:14px; margin-bottom:1.1em}
+ h1{font-size:clamp(34px,7vw,72px); line-height:1.08; letter-spacing:-.5px}
+ h1 .grad{background:linear-gradient(90deg,#a855f7,#22d3ee,#4ade80);
+ -webkit-background-clip:text; background-clip:text; color:transparent}
+ .lead{margin-top:1em; color:#cbd5e1; font-size:clamp(16px,2.2vw,23px)}
+ .chips{margin-top:1.5em; display:flex; gap:10px; flex-wrap:wrap}
+ .chip{padding:7px 15px; border-radius:12px; background:rgba(255,255,255,.08);
+ border:1px solid rgba(255,255,255,.18); font-size:clamp(13px,1.6vw,17px)}
+ .cards{margin-top:2.4em; display:grid; grid-template-columns:1fr 1fr; gap:20px}
+ @media (max-width:720px){ .cards{grid-template-columns:1fr} }
+ .card{display:block; text-decoration:none; color:inherit; border-radius:20px; padding:26px 26px 24px;
+ background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.14); border-top:5px solid var(--accent);
+ transition:transform .18s ease, background .18s ease, box-shadow .18s ease}
+ .card:hover{transform:translateY(-4px); background:rgba(255,255,255,.09); box-shadow:0 18px 40px rgba(0,0,0,.35)}
+ .card .ico{font-size:2.2em}
+ .card h2{font-size:clamp(20px,2.6vw,28px); margin:.35em 0 .25em; color:#fff}
+ .card p{color:#cbd5e1; font-size:clamp(14px,1.8vw,18px); line-height:1.5}
+ .card .go{display:inline-block; margin-top:1em; font-weight:800; color:var(--accentb)}
+ .card .go::after{content:" →"}
+ .foot{margin-top:2.6em; color:var(--muted); font-size:clamp(13px,1.6vw,16px); line-height:1.7}
+ .foot a{color:#cbd5e1; text-decoration:none; border-bottom:1px solid rgba(255,255,255,.25)}
+</style>
+</head>
+<body>
+ <div class="wrap">
+ <span class="badge">產業AI人才培訓 · 兩小時實作課</span>
+ <h1>AI Agent 與 CLI 入門<br><span class="grad">讓 AI 在你的資料夾裡做事</span></h1>
+ <p class="lead">用 Antigravity CLI 打造你的「工作學習助理」——從生成式 AI、CLI 到動手實作。</p>
+ <div class="chips">
+ <span class="chip">🧠 生成式 AI</span>
+ <span class="chip">🤖 AI Agent</span>
+ <span class="chip">💻 CLI 終端機</span>
+ <span class="chip">🛠️ 動手實作</span>
+ </div>
+
+ <div class="cards">
+ <a class="card" href="course/" style="--accent:var(--p1);--accentb:var(--p1b)">
+ <div class="ico">📊</div>
+ <h2>課程投影片</h2>
+ <p>完整上課簡報：生成式 AI 觀念、CLI 入門、安裝 Antigravity CLI，到讓 Agent 讀檔、規劃、產生檔案的實作。</p>
+ <span class="go">進入投影片</span>
+ </a>
+ <a class="card" href="https://leolinleo1200.github.io/myportfolio/" target="_blank" rel="noopener" style="--accent:var(--p4);--accentb:var(--p4b)">
+ <div class="ico">🌐</div>
+ <h2>示範作品站</h2>
+ <p>LEO ｜ Senior Product Manager Portfolio——用 <b>agy</b> 產生、GitHub Pages 上線的成果，就是課後作業「自我介紹網站」的示範。</p>
+ <span class="go">看示範站</span>
+ </a>
+ </div>
+
+ <p class="foot">
+ 講師：劉冠麟（Leo）· <a href="mailto:leo_liu@liveabc.com">leo_liu@liveabc.com</a><br>
+ 希伯崙股份有限公司 × 喜樂泉源股份有限公司 · 2026
+ </p>
+ </div>
+</body>
+</html>

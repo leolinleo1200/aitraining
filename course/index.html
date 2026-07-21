@@ -1,0 +1,1071 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Agent 與 CLI 入門・兩小時實作課</title>
+<style>
+ :root{
+ --p1:#7c3aed; --p1b:#a855f7;
+ --p2:#0891b2; --p2b:#22d3ee;
+ --p3:#ea580c; --p3b:#f59e0b;
+ --p4:#16a34a; --p4b:#4ade80;
+ --ink:#1f2937; --muted:#6b7280; --line:#e5e7eb;
+ --accent:var(--p1); --accentb:var(--p1b);
+ --bg:#ffffff;
+ }
+ *{box-sizing:border-box;margin:0;padding:0}
+ html,body{height:100%}
+ body{
+ font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","PingFang TC","Microsoft JhengHei",Arial,sans-serif;
+ color:var(--ink); background:#0f172a; overflow:hidden;
+ }
+ .deck{position:fixed; inset:0}
+ .slide{
+ position:absolute; inset:0; display:none;
+ flex-direction:column; justify-content:center;
+ padding:6vh 8vw 10vh; background:var(--bg);
+ animation:fade .35s ease;
+ }
+ .slide.active{display:flex}
+ @keyframes fade{from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:none}}
+ .slide h1{font-size:clamp(30px,5.4vw,64px); line-height:1.14; letter-spacing:-.5px}
+ .slide h2{font-size:clamp(26px,4vw,46px); line-height:1.18; margin-bottom:.55em}
+ .slide h3{font-size:clamp(18px,2.1vw,26px); color:var(--muted); font-weight:600}
+ .slide p, .slide li{font-size:clamp(17px,2.05vw,25px); line-height:1.5}
+ .kicker{
+ display:inline-block; font-size:clamp(13px,1.4vw,17px); font-weight:800;
+ letter-spacing:2px; color:var(--accent); text-transform:uppercase; margin-bottom:.7em;
+ }
+ .accent-bar{width:64px; height:7px; border-radius:6px; margin:.2em 0 .8em;
+ background:linear-gradient(90deg,var(--accent),var(--accentb))}
+ ul.big{list-style:none; display:flex; flex-direction:column; gap:.62em; margin-top:.4em}
+ ul.big li{position:relative; padding-left:1.7em}
+ ul.big li::before{
+ content:""; position:absolute; left:0; top:.62em; width:.72em; height:.72em; border-radius:50%;
+ background:linear-gradient(135deg,var(--accent),var(--accentb));
+ }
+ ul.big li b{color:var(--accent)}
+ .sub{color:var(--muted); font-size:.85em}
+ .cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:18px; margin-top:.6em}
+ .card{border:2px solid var(--line); border-radius:16px; padding:20px 22px; background:#fff;
+ border-top:6px solid var(--accent)}
+ .card .ico{font-size:1.8em}
+ .card h4{font-size:clamp(18px,2.1vw,24px); margin:.25em 0 .25em; color:var(--accent)}
+ .card p{font-size:clamp(15px,1.7vw,19px); color:#374151}
+ pre{background:#0b1220; color:#e5e7eb; border-radius:14px; padding:18px 20px;
+ font-family:"Cascadia Code",Consolas,SFMono-Regular,monospace; overflow:auto;
+ font-size:clamp(14px,1.65vw,20px); line-height:1.55; border:1px solid #1e293b}
+ pre .c{color:#7dd3a0}
+ pre .k{color:#f0abfc}
+ pre .s{color:#fbbf24}
+ .os-tag{display:inline-block; font-size:.8em; font-weight:800; padding:2px 10px; border-radius:999px;
+ margin-bottom:6px}
+ .win{background:#dbeafe; color:#1d4ed8}
+ .mac{background:#f3e8ff; color:#7c3aed}
+ .cmd{background:#1f2937; color:#e5e7eb}
+ .twocol{display:grid; grid-template-columns:1fr 1fr; gap:22px}
+ @media (max-width:820px){ .twocol{grid-template-columns:1fr} }
+ table{border-collapse:collapse; width:100%; margin-top:.5em; font-size:clamp(15px,1.8vw,22px)}
+ th,td{border:1px solid var(--line); padding:12px 14px; text-align:left}
+ th{background:var(--accent); color:#fff; font-weight:700}
+ tr:nth-child(even) td{background:#f9fafb}
+ .callout{border-radius:16px; padding:18px 22px; margin-top:.6em; font-size:clamp(16px,1.9vw,22px);
+ background:#fff7ed; border:2px solid var(--p3); color:#7c2d12}
+ .callout.rule{background:#ecfeff; border-color:var(--p2); color:#155e75}
+ .callout b{color:inherit}
+ .callout .lead{font-weight:800; display:block; margin-bottom:.2em}
+ code.inline{background:#f3f4f6; padding:2px 8px; border-radius:6px;
+ font-family:Consolas,monospace; color:#be123c; font-size:.92em}
+ .tsjump{color:var(--accent); font-weight:700; text-decoration:none; border-bottom:2px solid transparent}
+ .tsjump:hover{border-bottom-color:var(--accent)}
+ .tsjump .t{display:inline-block; font-variant-numeric:tabular-nums; background:#eef2ff;
+ color:var(--accent); padding:1px 9px; border-radius:7px; margin-right:.5em; font-size:.9em}
+ .divider{color:#fff; background:linear-gradient(135deg,var(--accent),var(--accentb))}
+ .divider .num{font-size:clamp(60px,14vw,150px); font-weight:900; opacity:.28; line-height:.9}
+ .divider h1{font-size:clamp(34px,6.4vw,78px)}
+ .divider p{opacity:.95; margin-top:.5em; font-size:clamp(18px,2.4vw,30px)}
+ .divider .accent-bar{background:rgba(255,255,255,.85)}
+ .cover{background:
+ radial-gradient(1200px 600px at 15% 0%, rgba(124,58,237,.20), transparent 60%),
+ radial-gradient(1000px 600px at 100% 100%, rgba(22,163,74,.18), transparent 55%),
+ linear-gradient(135deg,#0f172a,#1e1b4b 55%,#0f172a);
+ color:#fff}
+ .cover .badge{display:inline-block; padding:7px 16px; border-radius:999px; font-weight:800;
+ letter-spacing:1px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.25);
+ font-size:clamp(13px,1.5vw,17px); margin-bottom:1.1em}
+ .cover h1{font-size:clamp(34px,7vw,86px); line-height:1.08}
+ .cover .grad{background:linear-gradient(90deg,#a855f7,#22d3ee,#4ade80);
+ -webkit-background-clip:text; background-clip:text; color:transparent}
+ .cover .meta{margin-top:1.4em; color:#cbd5e1; font-size:clamp(16px,2vw,24px)}
+ .cover .chips{margin-top:1.6em; display:flex; gap:12px; flex-wrap:wrap}
+ .cover .chip{padding:8px 16px; border-radius:12px; background:rgba(255,255,255,.08);
+ border:1px solid rgba(255,255,255,.18); font-size:clamp(14px,1.7vw,20px)}
+ .bar{position:fixed; left:0; right:0; bottom:0; height:46px; display:flex; align-items:center;
+ justify-content:space-between; padding:0 18px; font-size:14px; color:#64748b;
+ background:rgba(255,255,255,.75); backdrop-filter:blur(6px); border-top:1px solid var(--line); z-index:5}
+ .bar .seclabel{font-weight:800; color:var(--accent)}
+ .bar .count{font-variant-numeric:tabular-nums}
+ .progress{position:fixed; left:0; top:0; height:5px; z-index:6;
+ background:linear-gradient(90deg,var(--accent),var(--accentb)); transition:width .3s ease}
+ .hint{position:fixed; right:16px; bottom:56px; font-size:12.5px; color:#94a3b8; z-index:5;
+ background:rgba(255,255,255,.85); padding:6px 12px; border-radius:999px; border:1px solid var(--line);
+ transition:opacity .5s ease}
+ .nav-btn{position:fixed; top:50%; transform:translateY(-50%); z-index:7;
+ width:56px; height:56px; border-radius:50%; border:none; cursor:pointer;
+ display:flex; align-items:center; justify-content:center; font-size:26px; line-height:1;
+ color:#fff; background:linear-gradient(135deg,var(--accent),var(--accentb));
+ box-shadow:0 6px 20px rgba(15,23,42,.28); opacity:.55; transition:opacity .2s, transform .2s}
+ .nav-btn:hover{opacity:1; transform:translateY(-50%) scale(1.08)}
+ .nav-btn:active{transform:translateY(-50%) scale(.94)}
+ .nav-btn.prev{left:20px}
+ .nav-btn.next{right:20px}
+ .nav-btn:disabled{opacity:.15; cursor:default; transform:translateY(-50%)}
+ .bar-nav{display:flex; align-items:center; gap:8px}
+ .bar-btn{border:1px solid var(--line); background:#fff; color:var(--accent); font-weight:800;
+ border-radius:8px; padding:4px 12px; cursor:pointer; font-size:13px}
+ .bar-btn:hover{background:var(--accent); color:#fff; border-color:var(--accent)}
+ .bar-btn:disabled{opacity:.35; cursor:default; color:var(--muted); background:#fff}
+ .demolink{text-decoration:none; color:var(--accent); font-weight:800; font-size:13px; white-space:nowrap;
+ border:1px solid var(--line); border-radius:8px; padding:4px 12px}
+ .demolink:hover{background:var(--accent); color:#fff; border-color:var(--accent)}
+ .seclabel, .count{cursor:pointer; user-select:none}
+ .seclabel:hover, .count:hover{opacity:.7}
+ .count::after{content:" ▾"; color:#94a3b8; font-size:.85em}
+ .seclabel::after{content:" ▾"; color:#94a3b8; font-size:.85em}
+ .chapmenu{position:fixed; left:12px; bottom:54px; z-index:9; background:#fff; border:1px solid var(--line);
+ border-radius:12px; box-shadow:0 12px 40px rgba(15,23,42,.28); padding:8px; display:none; min-width:230px}
+ .chapmenu.open{display:block}
+ .chapmenu button{display:flex; justify-content:space-between; gap:18px; width:100%; text-align:left;
+ border:none; background:none; padding:9px 12px; border-radius:8px; cursor:pointer; font-size:15px;
+ font-family:inherit; color:var(--ink)}
+ .chapmenu button:hover{background:#f1f5f9}
+ .chapmenu button.cur{color:var(--accent); font-weight:800}
+ .chapmenu button .pg{color:#94a3b8; font-variant-numeric:tabular-nums}
+ .overlay{position:fixed; inset:0; z-index:10; background:rgba(15,23,42,.74); backdrop-filter:blur(4px);
+ display:none; padding:4vh 4vw 6vh; overflow:auto}
+ .overlay.open{display:block}
+ .ov-head{display:flex; justify-content:space-between; align-items:center; color:#fff; margin-bottom:8px}
+ .ov-head h3{font-size:clamp(18px,2.2vw,24px)}
+ .ov-close{border:none; background:rgba(255,255,255,.16); color:#fff; width:40px; height:40px;
+ border-radius:50%; cursor:pointer; font-size:20px}
+ .ov-sec{color:#cbd5e1; font-weight:800; font-size:14px; letter-spacing:1px; margin:18px 0 8px}
+ .ov-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:10px}
+ .ov-item{display:flex; gap:10px; align-items:flex-start; text-align:left; cursor:pointer;
+ background:#fff; border:2px solid transparent; border-radius:10px; padding:10px 12px; font-family:inherit;
+ color:var(--ink); font-size:14px; line-height:1.35}
+ .ov-item:hover{border-color:#a855f7}
+ .ov-item.cur{outline:3px solid #4ade80; border-color:transparent}
+ .ov-item .pg{font-weight:800; color:#64748b; font-variant-numeric:tabular-nums; min-width:1.7em}
+ @media print{ .chapmenu, .overlay{display:none !important} }
+ @media print{ .nav-btn{display:none} }
+ @media print{ .bar,.hint,.progress{display:none} .slide{display:flex !important; position:relative; page-break-after:always; height:100vh} }
+ .introgrid{display:grid; grid-template-columns:1.12fr .88fr; gap:38px; align-items:center}
+ @media (max-width:820px){ .introgrid{grid-template-columns:1fr} }
+ .imgcol{display:flex; align-items:center; justify-content:center; min-height:40vh}
+ .imgcol img{height:74vh; width:auto; max-width:100%; object-fit:contain; border-radius:20px;
+ border:3px solid var(--line); background:#f1f5f9; box-shadow:0 12px 34px rgba(15,23,42,.20)}
+ .intro-list{list-style:none; display:flex; flex-direction:column; gap:.6em; margin-top:.55em}
+ .intro-list li{display:flex; gap:.9em; font-size:clamp(17px,2vw,24px); line-height:1.45}
+ .intro-list li b{flex:none; min-width:3.4em; color:var(--accent); font-weight:800}
+ .qrcard{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
+ border:2px solid var(--line); border-radius:20px; padding:22px 22px 20px; background:#fff}
+ .qrcard .qrimg{background:#fff; padding:10px; border-radius:12px; line-height:0}
+ .qrcard svg{width:min(34vh,40vw); height:auto; display:block}
+ .qrlink{font-family:Consolas,monospace; font-weight:800; text-decoration:none; letter-spacing:.5px;
+ color:var(--p2); background:#ecfeff; padding:9px 18px; border-radius:10px; font-size:clamp(15px,1.9vw,23px)}
+ .steps{list-style:none; counter-reset:st; display:flex; flex-direction:column; gap:.5em; margin-top:.3em}
+ .steps li{position:relative; padding-left:2.3em; font-size:clamp(16px,1.9vw,22px); line-height:1.4}
+ .steps li::before{counter-increment:st; content:counter(st); position:absolute; left:0; top:.02em;
+ width:1.55em; height:1.55em; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accentb));
+ color:#fff; font-weight:800; font-size:.82em; display:flex; align-items:center; justify-content:center}
+ .ghframe{border:1px solid var(--line); border-radius:14px; overflow:hidden; background:#fff; box-shadow:0 12px 34px rgba(15,23,42,.18)}
+ .ghbar{display:flex; align-items:center; gap:7px; padding:9px 12px; background:#f3f4f6; border-bottom:1px solid var(--line)}
+ .ghbar .dot{width:11px; height:11px; border-radius:50%}
+ .ghbar .url{flex:1; margin-left:6px; background:#fff; border:1px solid var(--line); border-radius:999px;
+ padding:5px 12px; font-family:Consolas,monospace; font-size:.78em; color:#475569; white-space:nowrap; overflow:hidden}
+ .ghbody{padding:26px 24px; background:linear-gradient(135deg,#0f172a,#1e1b4b); color:#fff}
+ .ghp{border:1px solid var(--line); border-radius:14px; padding:16px 18px; background:#fff}
+ .ghp .row{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:.4em 0}
+ .ghp .lbl{color:var(--muted); font-size:.85em; min-width:5.2em}
+ .ghsel{border:1px solid #d0d7de; border-radius:8px; padding:6px 12px; background:#f6f8fa; font-weight:700; font-size:.9em; color:#1f2328}
+ .ghsel::after{content:" ▾"; color:#6e7781}
+ .ghsave{background:#1f883d; color:#fff; border:1px solid rgba(27,31,36,.15); border-radius:8px; padding:6px 18px; font-weight:800; font-size:.9em}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<div class="deck" id="deck">
+<section class="slide cover active" data-sec="開場">
+ <span class="badge">兩小時實作課 · 產業AI人才培訓</span>
+ <h1>AI Agent 與 CLI 入門<br><span class="grad">讓 AI 在你的資料夾裡做事</span></h1>
+ <div class="meta">用 <b>Antigravity CLI</b> 打造你的「工作學習助理」</div>
+ <div class="chips">
+ <span class="chip">🧠 生成式 AI</span>
+ <span class="chip">🤖 AI Agent</span>
+ <span class="chip">💻 CLI 終端機</span>
+ <span class="chip">🛠️ 動手實作</span>
+ </div>
+ <div class="meta" style="margin-top:1.6em; font-size:.8em; color:#94a3b8">版本日期 2026-07-20</div>
+</section>
+<section class="slide" data-sec="講師介紹" style="--accent:var(--p1);--accentb:var(--p1b)">
+ <div class="introgrid">
+ <div>
+ <h2>劉冠麟</h2>
+ <p class="sub" style="margin-top:-.2em">leo_liu@liveabc.com</p>
+ <div class="accent-bar"></div>
+ <ul class="intro-list">
+ <li><b>現職</b>LiveABC 研發四部/專案業務部 經理</li>
+ <li><b>團隊</b>10人</li>
+ <li><b>學歷</b>銘傳大學資訊傳播工程學系<br>國立中央大學網路學習科技研究所</li>
+ <li><b>專長</b>數位學習專案開發<br>多媒體互動課程設計<br>AI應用程式開發<br>政府輔助計畫專案管理</li>
+ <li><b>興趣</b>跟AI AGENT講話、音樂創作、玩小孩</li>
+ </ul>
+ </div>
+ <div class="imgcol"><img src="leo.jpg" alt="劉冠麟"></div>
+ </div>
+</section>
+<section class="slide" data-sec="講師介紹" style="--accent:var(--p1);--accentb:var(--p1b)">
+ <div class="introgrid">
+ <div>
+ <h1>“被”AI系</h1>
+ <div class="accent-bar"></div>
+ </div>
+ <div class="imgcol"><img src="mcuai.jpg" alt="被AI系"></div>
+ </div>
+</section>
+<section class="slide divider dark" data-sec="Discord 協作" style="--accent:var(--p2);--accentb:var(--p1b)">
+ <div class="num">💬</div>
+ <h1>Discord 協作入口</h1>
+ <div class="accent-bar"></div>
+ <p>加入頻道、找到小來福、開始提問</p>
+</section>
+<section class="slide" data-sec="Discord 協作" style="--accent:var(--p2);--accentb:var(--p2b)">
+ <span class="kicker">課後支援管道</span>
+ <h2>為什麼要加入 Discord？</h2>
+ <div class="accent-bar"></div>
+ <div class="cards">
+ <div class="card"><div class="ico">📅</div><h4>查課表很快</h4><p>直接問日期、課名、時間、地點，不用翻整份計畫書。</p></div>
+ <div class="card"><div class="ico">📚</div><h4>查課程內容</h4><p>可以問某堂課會學什麼、用哪些 AI 工具、講師是誰。</p></div>
+ <div class="card"><div class="ico">🎯</div><h4>問計畫規則</h4><p>招生資格、名額、獎勵、模組差異，都可以直接問小來福。</p></div>
+ </div>
+ <div class="callout rule"><span class="lead">小來福是誰</span>小來福是這個計畫的專屬 AI 助教，主要回答：<b>計畫內容、課表、課程主題、講師、資格、獎勵</b>。</div>
+</section>
+<section class="slide" data-sec="Discord 協作" style="--accent:var(--p2);--accentb:var(--p2b)">
+ <span class="kicker">加入方式</span>
+ <h2>怎麼加入 Discord 頻道？</h2>
+ <div class="accent-bar"></div>
+ <div class="twocol" style="align-items:center">
+ <div>
+ <ol class="big" style="list-style:none">
+ <li>先準備好 <b>Discord 帳號</b>（手機 App 或電腦版都可以）</li>
+ <li><b>掃描右方 QR Code</b>（或點開下方連結）加入本課程 Discord 伺服器</li>
+ <li>進入指定的 <b>課程頻道 / 助教頻道</b></li>
+ <li>就可以直接在裡面提問或 @ 小來福</li>
+ </ol>
+ </div>
+ <div class="qrcard">
+ <div class="qrimg"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 37 37" class="segno"><path class="qrline" stroke="#0b1220" d="M4 4.5h7m2 0h3m3 0h1m6 0h7m-29 1h1m5 0h1m2 0h1m2 0h3m1 0h4m2 0h1m5 0h1m-29 1h1m1 0h3m1 0h1m1 0h4m1 0h3m1 0h2m1 0h1m1 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m3 0h3m2 0h1m2 0h3m1 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m1 0h1m1 0h1m2 0h1m1 0h1m1 0h2m3 0h1m1 0h3m1 0h1m-29 1h1m5 0h1m1 0h1m1 0h1m1 0h1m2 0h2m1 0h2m2 0h1m5 0h1m-29 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-20 1h2m1 0h6m-17 1h1m2 0h1m1 0h1m1 0h2m1 0h1m1 0h4m1 0h1m1 0h2m1 0h2m1 0h1m-25 1h1m1 0h1m4 0h2m1 0h1m1 0h1m1 0h1m1 0h1m4 0h2m1 0h3m-29 1h1m1 0h2m2 0h1m3 0h6m4 0h2m3 0h2m1 0h1m-29 1h4m3 0h4m1 0h1m3 0h3m1 0h2m1 0h2m2 0h2m-28 1h1m1 0h1m1 0h2m1 0h2m6 0h2m1 0h2m2 0h1m1 0h1m2 0h1m-29 1h6m2 0h2m8 0h1m3 0h1m1 0h1m1 0h1m1 0h1m-28 1h1m1 0h1m2 0h1m1 0h1m2 0h2m1 0h1m2 0h1m3 0h1m2 0h1m3 0h1m-29 1h3m1 0h2m1 0h2m1 0h1m1 0h1m1 0h1m1 0h2m2 0h2m1 0h1m1 0h1m-24 1h1m1 0h1m1 0h1m1 0h1m2 0h1m1 0h2m3 0h4m1 0h2m2 0h1m-28 1h4m1 0h1m4 0h2m4 0h3m3 0h3m3 0h1m-24 1h2m1 0h1m3 0h2m2 0h1m1 0h1m1 0h1m4 0h2m1 0h1m-27 1h2m3 0h1m1 0h5m3 0h2m4 0h1m1 0h1m1 0h2m-29 1h2m1 0h4m1 0h1m1 0h1m4 0h1m1 0h1m1 0h6m2 0h2m-21 1h1m1 0h3m2 0h1m1 0h1m1 0h2m3 0h1m1 0h1m1 0h1m-29 1h7m2 0h1m1 0h2m2 0h2m1 0h3m1 0h1m1 0h1m3 0h1m-29 1h1m5 0h1m6 0h1m1 0h1m3 0h2m3 0h2m1 0h1m-28 1h1m1 0h3m1 0h1m1 0h1m1 0h1m5 0h1m2 0h6m2 0h2m-29 1h1m1 0h3m1 0h1m2 0h2m1 0h1m5 0h1m4 0h1m1 0h3m-28 1h1m1 0h3m1 0h1m2 0h1m2 0h1m1 0h2m3 0h3m4 0h3m-29 1h1m5 0h1m1 0h2m2 0h6m3 0h1m1 0h1m1 0h1m1 0h2m-29 1h7m3 0h2m5 0h1m2 0h1m3 0h1m2 0h1"/></svg></div>
+ <a class="qrlink" href="https://discord.gg/rqYJhAemx">discord.gg/rqYJhAemx</a>
+ </div>
+ </div>
+</section>
+<section class="slide" data-sec="Discord 協作" style="--accent:var(--p1);--accentb:var(--p1b)">
+ <span class="kicker">提問格式</span>
+ <h2>怎麼 @ 小來福？</h2>
+ <div class="accent-bar"></div>
+ <p>在 Discord 訊息框輸入 <code class="inline">@小來福</code>，再接你的問題即可。</p>
+ <div class="twocol">
+ <div>
+ <p class="sub">可以這樣問</p>
+ <pre>@小來福 今天的共同課程是什麼？
+
+@小來福 8/13 那堂課會用到哪些工具？
+
+@小來福 A+B 跟 A+C 差在哪裡？</pre>
+ </div>
+ <div>
+ <p class="sub">比較好的問法</p>
+ <ul class="big" style="font-size:.82em">
+ <li>一次講清楚：<b>日期 + 問題</b></li>
+ <li>問課表時，最好帶上 <b>課程日期</b></li>
+ <li>問模組差異時，直接寫 <b>A+B / A+C</b></li>
+ <li>如果想問資格，直接問：<b>我符合報名條件嗎？</b></li>
+ </ul>
+ </div>
+ </div>
+ <div class="callout rule"><span class="lead">提醒</span>如果 Discord 名單中出現可選的提及對象，請選擇名稱為 <b>小來福</b> 的助教帳號；提問後等它回覆即可。</div>
+</section>
+<section class="slide" data-sec="開場" style="--accent:var(--p4);--accentb:var(--p4b)">
+ <span class="kicker">課程結束時</span>
+ <h2>你會親手做出一個資料夾 📁</h2>
+ <div class="accent-bar"></div>
+ <p style="margin-bottom:.5em">一個叫 <code class="inline">ai-agent-demo</code> 的資料夾，裡面有 AI 幫你產生的：</p>
+ <div class="cards">
+ <div class="card"><div class="ico">📝</div><h4>summary.md</h4><p>AI 幫你整理的課程摘要</p></div>
+ <div class="card"><div class="ico">✅</div><h4>todo.md</h4><p>AI 產生的本週學習任務</p></div>
+ <div class="card"><div class="ico">🎤</div><h4>talk-outline.md</h4><p>3 分鐘報告大綱</p></div>
+ <div class="card"><div class="ico">🗣️</div><h4>speaker-script.md</h4><p>3 分鐘報告講稿</p></div>
+ <div class="card"><div class="ico">🔍</div><h4>checklist.md</h4><p>自我檢查清單</p></div>
+ <div class="card"><div class="ico">🧾</div><h4>你的筆記</h4><p>notes/week1.md</p></div>
+ </div>
+</section>
+<section class="slide" data-sec="開場" style="--accent:var(--p2);--accentb:var(--p2b)">
+ <span class="kicker">今天的四個階段</span>
+ <h2>課程地圖 🗺️</h2>
+ <div class="accent-bar"></div>
+ <div class="cards">
+ <div class="card" style="--accent:var(--p1)"><div class="ico">🧠</div><h4>Part 1 · 懂 AI</h4><p>生成式 AI、token、prompt，從 LLM 到 Agent</p></div>
+ <div class="card" style="--accent:var(--p2)"><div class="ico">💻</div><h4>Part 2 · 懂 CLI</h4><p>用文字命令控制電腦與檔案</p></div>
+ <div class="card" style="--accent:var(--p3)"><div class="ico">⬇️</div><h4>Part 3 · 裝工具</h4><p>安裝並登入 Antigravity CLI</p></div>
+ <div class="card" style="--accent:var(--p4)"><div class="ico">🛠️</div><h4>Part 4 · 做出來</h4><p>讓 Agent 讀檔、規劃、產生檔案</p></div>
+ </div>
+ <p style="margin-top:1em" class="sub"><b>核心目標：會下任務、會看結果、會控風險</b></p>
+</section>
+<section class="slide" data-sec="開場" style="--accent:var(--p3);--accentb:var(--p3b)">
+ <span class="kicker">開始前，先確認</span>
+ <h2>課前準備 ✅</h2>
+ <div class="accent-bar"></div>
+ <p>大部分工具課堂上會一起裝，但這三樣先備好，等等會順很多：</p>
+ <div class="cards">
+ <div class="card"><div class="ico">🧩</div><h4>VS Code</h4><p>程式編輯器，等等用 <code class="inline">code .</code> 打開資料夾<br>code.visualstudio.com</p></div>
+ <div class="card"><div class="ico">🌐</div><h4>可登入 Google 的瀏覽器</h4><p>Chrome / Edge 皆可，安裝與登入 Antigravity 會用到</p></div>
+ <div class="card"><div class="ico">📶</div><h4>穩定網路</h4><p>安裝、登入、呼叫 AI 都需要連網</p></div>
+ </div>
+ <div class="callout rule"><span class="lead">選配</span>只有最後「用程式呼叫 AI」的示範才需要 <b>Node.js 20+</b>（nodejs.org）；Antigravity CLI 本身不用裝 Node。</div>
+</section>
+<section class="slide divider dark" data-sec="Part 1 · 懂 AI" style="--accent:var(--p1);--accentb:var(--p1b)">
+ <div class="num">01</div>
+ <h1>先搞懂生成式 AI</h1>
+ <div class="accent-bar"></div>
+ <p>它到底在做什麼？跟搜尋差在哪？</p>
+</section>
+<section class="slide" data-sec="Part 1 · 懂 AI" style="--accent:var(--p1);--accentb:var(--p1b)">
+ <span class="kicker">先暖身幾分鐘</span>
+ <h2>生成式 AI 到底是什麼 🎬</h2>
+ <div class="accent-bar"></div>
+ <p>帶著三個問題看影片，看完就能一路接到後面的 Agent 與 CLI：</p>
+ <ul class="big">
+ <li>AI 是「找答案」還是「造答案」？</li>
+ <li>它為什麼是<b>一個字一個字</b>生成的？</li>
+ <li>它會不會講錯？為什麼？</li>
+ </ul>
+ <div class="callout"><span class="lead">影片</span>youtu.be/TigfpYPJk1s —— 建議觀看的段落，會標在後面對應的頁面。</div>
+</section>
+<section class="slide" data-sec="Part 1 · 懂 AI" style="--accent:var(--p1);--accentb:var(--p1b)">
+ <span class="kicker">核心觀念</span>
+ <h2>生成式 AI ≠ 搜尋 🔍</h2>
+ <div class="accent-bar"></div>
+ <div class="twocol">
+ <div class="card"><h4>🔎 傳統搜尋</h4><p>找出「已經存在」的答案，把網頁列給你。</p></div>
+ <div class="card"><h4>✨ 生成式 AI</h4><p>根據學到的模式，<b>產生一個可能合理的新答案</b>。</p></div>
+ </div>
+ <div class="callout rule"><span class="lead">用一句話記住</span>搜尋是「找答案」，生成式 AI 是「造答案」—— 所以它可能造錯，需要你檢查。</div>
+</section>
+<section class="slide" data-sec="Part 1 · 懂 AI" style="--accent:var(--p1);--accentb:var(--p1b)">
+ <span class="kicker">為什麼是「一個字一個字」冒出來</span>
+ <h2>Token 與逐步生成 🧩</h2>
+ <div class="accent-bar"></div>
+ <p>模型不是一次吐出整篇，而是把文字拆成 <b>token</b>，看著前文預測「下一個」，一路接下去。</p>
+ <pre><span class="c"># 模型會根據前文，推測下一段可能接什麼</span>
+今天我想學 AI，因為我希望…▮</pre>
+ <ul class="big">
+ <li>Prompt 寫得<b>清楚</b> → 輸出比較穩</li>
+ <li>上下文放<b>錯</b> → 答案會偏</li>
+ <li>看起來很有邏輯，<b>但仍可能是錯的</b></li>
+ </ul>
+ <div class="callout rule"><span class="lead">🎬 搭配影片</span>從 <b>2:00</b> 看到 <b>8:00</b>：<a class="tsjump" href="https://youtu.be/TigfpYPJk1s?t=120" target="_blank" rel="noopener">youtu.be/TigfpYPJk1s?t=120</a></div>
+</section>
+<section class="slide" data-sec="Part 1 · 懂 AI" style="--accent:var(--p1);--accentb:var(--p1b)">
+ <span class="kicker">最重要的一張</span>
+ <h2>Prompt 不是咒語，是「任務規格」📐</h2>
+ <div class="accent-bar"></div>
+ <pre><span class="k">角色</span> + <span class="k">目標</span> + <span class="k">上下文</span> + <span class="k">限制</span> + <span class="k">輸出格式</span> + <span class="k">檢查標準</span></pre>
+ <div class="twocol" style="margin-top:.5em">
+ <div class="card" style="--accent:#dc2626"><h4>❌ 差的 prompt</h4><p>「幫我讀 AI。」</p></div>
+ <div class="card" style="--accent:var(--p4)"><h4>✅ 好的 prompt</h4><p>你是我的學習助理。請讀 <code class="inline">notes/</code>，產生 <code class="inline">summary.md</code>：100 字摘要＋5 個關鍵詞＋3 個還想深入了解的問題。<b>不要加筆記裡沒提到的事實。</b></p></div>
+ </div>
+</section>
+<section class="slide" data-sec="Part 1 · 懂 AI" style="--accent:var(--p1);--accentb:var(--p1b)">
+ <span class="kicker">從「會聊天」到「會做事」</span>
+ <h2>Chatbot → Assistant → Agent 🤖</h2>
+ <div class="accent-bar"></div>
+ <table>
+ <thead><tr><th>類型</th><th>能力</th><th>例子</th></tr></thead>
+ <tbody>
+ <tr><td>Chatbot</td><td>回答問題</td><td>解釋 AI 是什麼</td></tr>
+ <tr><td>Assistant</td><td>幫你整理資訊</td><td>摘要一篇文章</td></tr>
+ <tr><td><b>Agent</b></td><td><b>拆任務＋用工具執行</b></td><td>讀資料夾、產生講稿、檢查檔案</td></tr>
+ </tbody>
+ </table>
+ <p style="margin-top:.7em" class="sub">Chatbot 偏「回答」，Agent 偏「執行」，而 <b>CLI 讓 Agent 能在你的電腦上真的動手</b>。</p>
+</section>
+<section class="slide" data-sec="Part 1 · 懂 AI" style="--accent:var(--p1);--accentb:var(--p1b)">
+ <span class="kicker">Agent 多了什麼</span>
+ <h2>Agent 的五個關鍵能力 🧭</h2>
+ <div class="accent-bar"></div>
+ <div class="cards">
+ <div class="card"><div class="ico">🗂️</div><h4>Planning 規劃</h4><p>把大目標拆成步驟</p></div>
+ <div class="card"><div class="ico">🔧</div><h4>Tool use 用工具</h4><p>讀檔、寫檔、跑命令</p></div>
+ <div class="card"><div class="ico">🧠</div><h4>Memory 記憶</h4><p>記住任務與上下文</p></div>
+ <div class="card"><div class="ico">🔁</div><h4>Reflection 反思</h4><p>檢查結果再修正</p></div>
+ <div class="card"><div class="ico">🙋</div><h4>Human-in-the-loop</h4><p>人先看計畫再放行</p></div>
+ </div>
+</section>
+<section class="slide" data-sec="Part 1 · 懂 AI" style="--accent:var(--p1);--accentb:var(--p1b)">
+ <span class="kicker">能力越強、風險越高</span>
+ <h2>用 AI 要小心的五件事 ⚠️</h2>
+ <div class="accent-bar"></div>
+ <ul class="big">
+ <li><b>幻覺</b>：講得很像真的，內容卻可能是錯的</li>
+ <li><b>隱私</b>：別把私人資料、身分證、密碼貼給 AI</li>
+ <li><b>權限</b>：Agent 會改檔案，就可能改錯</li>
+ <li><b>成本</b>：API 呼叫會累積費用與額度</li>
+ <li><b>責任</b>：最後要為成果負責、對外交出去的人，仍然是你自己</li>
+ </ul>
+ <div class="callout rule"><span class="lead">課堂鐵則</span>AI 產生內容，<b>人負責檢查</b>。</div>
+</section>
+<section class="slide divider dark" data-sec="Part 2 · 懂 CLI" style="--accent:var(--p2);--accentb:var(--p2b)">
+ <div class="num">02</div>
+ <h1>CLI 入門</h1>
+ <div class="accent-bar"></div>
+ <p>用文字命令，把 AI 從聊天框帶進真實工作</p>
+</section>
+<section class="slide" data-sec="Part 2 · 懂 CLI" style="--accent:var(--p2);--accentb:var(--p2b)">
+ <span class="kicker">為什麼要學終端機</span>
+ <h2>CLI ＝ 用文字控制電腦 ⌨️</h2>
+ <div class="accent-bar"></div>
+ <p>AI Agent 在 CLI 裡特別強，因為它能操作：</p>
+ <div class="cards">
+ <div class="card"><div class="ico">📄</div><h4>檔案 / 資料夾</h4><p>讀、建、改</p></div>
+ <div class="card"><div class="ico">📦</div><h4>套件 / 程式</h4><p>安裝與執行</p></div>
+ <div class="card"><div class="ico">🌿</div><h4>Git / 測試</h4><p>版本與驗證</p></div>
+ </div>
+ <div class="callout rule"><span class="lead">一句話</span>會用 CLI，就能把 AI 從「聊天」升級成「幫你把事做完」。</div>
+</section>
+<section class="slide" data-sec="Part 2 · 懂 CLI" style="--accent:var(--p2);--accentb:var(--p2b)">
+ <span class="kicker">CLI 基本指令 · 第一組</span>
+ <h2>移動與查看 🧭</h2>
+ <div class="accent-bar"></div>
+ <div class="twocol">
+ <div>
+ <span class="os-tag win">🪟 Windows · PowerShell</span>
+ <pre><span class="k">pwd</span> <span class="c"># 現在在哪個資料夾</span>
+<span class="k">ls</span> <span class="c"># 列出檔案與資料夾</span>
+<span class="k">cd</span> demo <span class="c"># 進入 demo 資料夾</span>
+<span class="k">cd</span> .. <span class="c"># 回上一層</span>
+<span class="k">cls</span> <span class="c"># 清空畫面</span>
+<span class="k">cat</span> notes.md <span class="c"># 看檔案內容</span></pre>
+ </div>
+ <div>
+ <span class="os-tag mac">🍎 macOS / Linux</span>
+ <pre><span class="k">pwd</span>
+<span class="k">ls</span>
+<span class="k">cd</span> demo
+<span class="k">cd</span> ..
+<span class="k">clear</span> <span class="c"># 清空畫面</span>
+<span class="k">cat</span> notes.md</pre>
+ </div>
+ </div>
+ <p class="sub" style="margin-top:.4em">兩邊幾乎一樣，只有「清空畫面」不同：🪟 用 <code class="inline">cls</code>、🍎 用 <code class="inline">clear</code>。</p>
+</section>
+<section class="slide" data-sec="Part 2 · 懂 CLI" style="--accent:var(--p2);--accentb:var(--p2b)">
+ <span class="kicker">CLI 基本指令 · 第二組</span>
+ <h2>建立與整理 🛠️</h2>
+ <div class="accent-bar"></div>
+ <div class="twocol">
+ <div>
+ <span class="os-tag win">🪟 Windows · PowerShell</span>
+ <pre><span class="k">mkdir</span> notes <span class="c"># 建立資料夾</span>
+<span class="k">New-Item</span> week1.md <span class="c"># 建立空檔案</span>
+<span class="s">"今天學 CLI"</span> &gt; week1.md <span class="c"># 寫文字進檔案</span>
+<span class="k">Copy-Item</span> a.md b.md <span class="c"># 複製檔案</span>
+<span class="k">Rename-Item</span> a.md c.md <span class="c"># 改檔名</span>
+<span class="k">code</span> . <span class="c"># 用 VS Code 打開</span></pre>
+ </div>
+ <div>
+ <span class="os-tag mac">🍎 macOS / Linux</span>
+ <pre><span class="k">mkdir</span> notes
+<span class="k">touch</span> week1.md
+<span class="k">echo</span> <span class="s">"今天學 CLI"</span> &gt; week1.md
+<span class="k">cp</span> a.md b.md
+<span class="k">mv</span> a.md c.md
+<span class="k">code</span> .</pre>
+ </div>
+ </div>
+ <div class="callout rule"><span class="lead">⌨️ 操作技巧（讓打指令更快）</span>按 <b>Tab</b> 自動補檔名/資料夾名 ・ 按 <b>↑</b> 叫回上一個指令 ・ <b>Ctrl + C</b> 中斷正在跑的指令</div>
+</section>
+<section class="slide" data-sec="Part 2 · 懂 CLI" style="--accent:var(--p2);--accentb:var(--p2b)">
+ <span class="kicker">在終端機讓 AI 動手前</span>
+ <h2>三條安全規則 🛡️</h2>
+ <div class="accent-bar"></div>
+ <ul class="big">
+ <li>不要把 <b>API key、密碼、身分證、私人資料</b> 貼給 AI</li>
+ <li>看不懂的<b>刪除指令不要執行</b>（例如 rm、del 之類）</li>
+ <li>每次 Agent 改完檔，用 <b>Git 或檔案 diff 檢查</b>它到底動了什麼</li>
+ </ul>
+</section>
+<section class="slide divider dark" data-sec="Part 3 · 裝工具" style="--accent:var(--p3);--accentb:var(--p3b)">
+ <div class="num">03</div>
+ <h1>安裝 Antigravity CLI</h1>
+ <div class="accent-bar"></div>
+ <p>Google 的新一代終端機 AI 代理工具</p>
+</section>
+<section class="slide" data-sec="Part 3 · 裝工具" style="--accent:var(--p3);--accentb:var(--p3b)">
+ <span class="kicker">今天的主角工具</span>
+ <h2>認識 Antigravity CLI（agy）🤖</h2>
+ <div class="accent-bar"></div>
+ <div class="cards">
+ <div class="card"><div class="ico">🚀</div><h4>一個指令啟動</h4><p>在終端機輸入 <code class="inline">agy</code> 就開始</p></div>
+ <div class="card"><div class="ico">🔧</div><h4>會在電腦上做事</h4><p>讀檔、寫檔、跑命令、把任務拆步驟</p></div>
+ <div class="card"><div class="ico">📦</div><h4>免裝 Node.js</h4><p>單一執行檔，裝好即用</p></div>
+ <div class="card"><div class="ico">🧠</div><h4>Google 的終端機 AI</h4><p>預設 Gemini 3.5 Flash，會自動選模型</p></div>
+ </div>
+ <div class="callout rule"><span class="lead">怎麼用</span>用 <b>Google 帳號</b>登入就能開始，有免費額度。接下來三張教你 <b>安裝 → 登入 → 額度</b>。</div>
+</section>
+<section class="slide" data-sec="Part 3 · 裝工具" style="--accent:var(--p3);--accentb:var(--p3b)">
+ <span class="kicker">一行指令安裝</span>
+ <h2>安裝 Antigravity CLI ⬇️</h2>
+ <div class="accent-bar"></div>
+ <div class="twocol">
+ <div>
+ <span class="os-tag win">🪟 Windows · PowerShell（首選）</span>
+ <pre><span class="k">irm</span> https://antigravity.google/cli/install.ps1 | <span class="k">iex</span></pre>
+ <span class="os-tag cmd" style="margin-top:12px">⬛ Windows · CMD 命令提示字元</span>
+ <pre style="white-space:pre-wrap"><span class="k">curl</span> -fsSL https://antigravity.google/cli/install.cmd -o install.cmd &amp;&amp; <span class="k">install.cmd</span> &amp;&amp; <span class="k">del</span> install.cmd</pre>
+ </div>
+ <div>
+ <span class="os-tag mac">🍎 macOS / Linux</span>
+ <pre><span class="k">curl</span> -fsSL https://antigravity.google/cli/install.sh | <span class="k">bash</span></pre>
+ <p class="sub" style="margin-top:14px"><code class="inline">irm｜iex</code> 是 PowerShell 專用、CMD 不能用，所以 CMD 改抓 <code class="inline">install.cmd</code> 再執行。兩者差別看下一頁。</p>
+ </div>
+ </div>
+ <p style="margin-top:.6em">安裝完，直接輸入指令啟動：</p>
+ <pre><span class="k">agy</span> <span class="c"># 啟動 Antigravity CLI</span></pre>
+ <p class="sub">它是單一執行檔，<b>不需要先裝 Node.js</b>。網路被公司/學校擋住，改到 <code class="inline">antigravity.google/download</code> 下載安裝檔。</p>
+</section>
+<section class="slide" data-sec="Part 3 · 裝工具" style="--accent:var(--p3);--accentb:var(--p3b)">
+ <span class="kicker">Windows 有兩種終端機</span>
+ <h2>PowerShell 還是 CMD？怎麼選 🤔</h2>
+ <div class="accent-bar"></div>
+ <table>
+ <tr><th style="width:16%"> </th><th>🪟 PowerShell（首選）</th><th>⬛ CMD 命令提示字元</th></tr>
+ <tr><td><b>定位</b></td><td>較新、功能強，微軟主推</td><td>傳統、較陽春，相容舊環境</td></tr>
+ <tr><td><b>安裝 AGY</b></td><td><code class="inline">irm …｜iex</code> 一行完成</td><td>不支援 irm／iex，需先抓 <code class="inline">install.cmd</code> 再執行</td></tr>
+ <tr><td><b>怎麼打開</b></td><td>開始列搜尋「PowerShell」</td><td>開始列搜尋「cmd」或「命令提示字元」</td></tr>
+ <tr><td><b>本課</b></td><td>✅ 課堂首選</td><td>PowerShell 被鎖住時的備援</td></tr>
+ </table>
+ <div class="callout rule"><span class="lead">怎麼選</span>Windows 一律<b>先用 PowerShell</b>（官方主推、一行搞定）；只有 PowerShell 被公司/學校<b>政策封鎖</b>、或你比較習慣 CMD 時，才用 <b>CMD ＋ install.cmd</b>。🍎 Mac／Linux 直接用內建<b>終端機 Terminal</b>。</div>
+</section>
+<section class="slide" data-sec="Part 3 · 裝工具" style="--accent:var(--p3);--accentb:var(--p3b)">
+ <span class="kicker">這行指令到底在做什麼</span>
+ <h2>看懂安裝指令：irm … | iex 🔎</h2>
+ <div class="accent-bar"></div>
+ <pre><span class="k">irm</span> https://antigravity.google/cli/install.ps1 <span class="c">|</span> <span class="k">iex</span></pre>
+ <div class="cards">
+ <div class="card"><div class="ico">📥</div><h4>irm</h4><p><b>Invoke-RestMethod</b> 縮寫。從網址<b>下載</b>安裝腳本的內容。</p></div>
+ <div class="card"><div class="ico">➡️</div><h4>|（管線）</h4><p>把左邊下載到的東西，<b>交給</b>右邊處理。</p></div>
+ <div class="card"><div class="ico">▶️</div><h4>iex</h4><p><b>Invoke-Expression</b> 縮寫。把收到的文字<b>當指令執行</b>，完成安裝。</p></div>
+ </div>
+ <div class="callout"><span class="lead">⚠️ 安全觀念</span><code class="inline">irm … | iex</code> ＝ 下載網路腳本並直接執行。只對<b>信任的官方網址</b>（這裡是 antigravity.google）這樣做。🍎 Mac 的 <code class="inline">curl … | bash</code> 是一模一樣的道理。</div>
+</section>
+<section class="slide" data-sec="Part 3 · 裝工具" style="--accent:var(--p3);--accentb:var(--p3b)">
+ <span class="kicker">課堂首選登入方式</span>
+ <h2>用 Google 帳號登入 🔑</h2>
+ <div class="accent-bar"></div>
+ <ul class="big">
+ <li>第一次執行 <code class="inline">agy</code>，它會問你<b>要怎麼登入</b></li>
+ <li>選 <b>「1. Google OAuth」</b>，按 Enter → 自動開瀏覽器</li>
+ <li>用 <b>Google 帳號</b>登入、同意授權，畫面會給一段<b>代碼</b></li>
+ <li>把代碼<b>複製、貼回終端機</b> → 看到對話畫面就成功 ✅</li>
+ </ul>
+ <div class="callout"><span class="lead">卡住了怎麼辦</span>官方建議用 <b>Chrome + 個人 Gmail</b>。登入失敗或網路被擋 → 先用<b>瀏覽器版 Gemini</b> 把 prompt 練習跟上，等等再處理安裝。</div>
+</section>
+<section class="slide" data-sec="Part 3 · 裝工具" style="--accent:var(--p3);--accentb:var(--p3b)">
+ <span class="kicker">照官方教學走一次</span>
+ <h2>Antigravity CLI 快速上手 🏁</h2>
+ <div class="accent-bar"></div>
+ <div class="twocol">
+ <div>
+ <p class="sub">登入後，先丟一句話試試：</p>
+ <pre>Give me a famous quote
+on Artificial Intelligence</pre>
+ <p class="sub" style="margin-top:.5em">看指令與快捷鍵：</p>
+ <pre><span class="k">/help</span> <span class="c"># general / commands / shortcuts</span></pre>
+ </div>
+ <div>
+ <p class="sub">可用模型（官方）：</p>
+ <ul class="big" style="font-size:.8em">
+ <li><b>Gemini 3.5 Flash</b>（預設）/ 3.1 Pro</li>
+ <li>Claude Sonnet 4.6・Claude Opus 4.6</li>
+ <li>GPT-OSS 120B</li>
+ </ul>
+ </div>
+ </div>
+ <div class="callout rule"><span class="lead">官方資源</span>產品頁 antigravity.google/product/antigravity-cli ・ 官方教學 Google Codelabs「Hands-on with Antigravity CLI」</div>
+</section>
+<section class="slide" data-sec="Part 3 · 裝工具" style="--accent:var(--p3);--accentb:var(--p3b)">
+ <span class="kicker">Antigravity 費用方案</span>
+ <h2>方案說明 💳</h2>
+ <div class="accent-bar"></div>
+ <table>
+ <thead><tr><th>方案</th><th>月費</th><th>適合誰</th></tr></thead>
+ <tbody>
+ <tr><td><b>Free 免費</b></td><td>$0（免信用卡）</td><td>今天上課、輕度試用</td></tr>
+ <tr><td>Pro</td><td>約 US$20</td><td>常態使用</td></tr>
+ <tr><td>Ultra</td><td>約 US$100</td><td>重度使用</td></tr>
+ <tr><td>Ultra Max</td><td>約 US$200</td><td>團隊 / 專業</td></tr>
+ </tbody>
+ </table>
+ <div class="callout"><span class="lead">免費版重點</span>免信用卡，每天約 <b>20 次</b> agent 請求、每 5 小時回補；付費方案有更多額度與 AI credits。<b>價格以官方 antigravity.google/pricing 為準。</b></div>
+</section>
+<section class="slide" data-sec="Part 3 · 裝工具" style="--accent:var(--p3);--accentb:var(--p3b)">
+ <span class="kicker">今天很重要的提醒</span>
+ <h2>免費額度要省著用 ⛽</h2>
+ <div class="accent-bar"></div>
+ <div class="twocol">
+ <div class="card" style="--accent:#dc2626"><h4>免費個人帳號</h4><p><b>每天 20 次</b> agent 請求<br>（Gemini Flash 額度每 5 小時回補）</p></div>
+ <div class="card" style="--accent:var(--p4)"><h4>所以在課堂上</h4><p>每個 prompt <b>想清楚再送</b><br>不要一直重試、洗版</p></div>
+ </div>
+ <div class="callout"><span class="lead">課堂提醒</span>免費額度不多（曾從 250 調降到 20/天）。今天實作只需要幾次呼叫，把每次用在刀口上；額度用完就換後面介紹的 <b>Copilot Chat</b>。</div>
+</section>
+<section class="slide" data-sec="Part 3 · 裝工具" style="--accent:var(--p3);--accentb:var(--p3b)">
+ <span class="kicker">額度有限，更要問得聰明</span>
+ <h2>省額度小技巧 & agy 能生成什麼 ⚡</h2>
+ <div class="accent-bar"></div>
+ <div class="twocol">
+ <div>
+ <p class="sub">🎯 讓每次都問到位（省額度）</p>
+ <ul class="big" style="font-size:.78em">
+ <li>一次講清楚：<b>角色＋目標＋限制＋格式</b>，別一句一句擠</li>
+ <li>一個 prompt <b>產多個檔</b>（summary＋todo＋checklist）</li>
+ <li>只指定要讀的檔：<code class="inline">只讀 content/about.md</code></li>
+ <li>限制長度：<b>「100 字內、5 點」</b>，又快又準</li>
+ <li>錯了就<b>定點修</b>，別整包重跑</li>
+ </ul>
+ </div>
+ <div>
+ <p class="sub">🛠️ 一個 prompt，agy 就能生成</p>
+ <ul class="big" style="font-size:.78em">
+ <li>摘要 / 待辦 / 檢查清單</li>
+ <li>自我介紹網站 <code class="inline">index.html</code>＋<code class="inline">style.css</code></li>
+ <li><code class="inline">README.md</code>、<code class="inline">.gitignore</code></li>
+ <li>批次改檔名、整理資料夾</li>
+ <li>Git commit 訊息、簡單測試</li>
+ </ul>
+ </div>
+ </div>
+ <div class="callout rule"><span class="lead">核心心法</span>先想清楚、<b>送一次</b>，勝過來回問十次 —— 省額度，也省時間。</div>
+</section>
+<section class="slide" data-sec="Part 3 · 裝工具" style="--accent:var(--p3);--accentb:var(--p3b)">
+ <span class="kicker">同一個需求，兩種問法</span>
+ <h2>隨便問 🆚 省額度問法</h2>
+ <div class="accent-bar"></div>
+ <div class="twocol">
+ <div>
+ <span class="os-tag" style="background:#fee2e2;color:#b91c1c">❌ 隨便問 · 來回燒額度</span>
+ <pre>幫我做個網站
+<span class="c"># agy：要放什麼內容？</span>
+放我的自我介紹
+<span class="c"># （做出來很陽春）</span>
+可以加聯絡方式嗎？
+再幫我改好看一點
+顏色換淺色一點
+字太小，放大
+…來回 8 次，額度快見底</pre>
+ </div>
+ <div>
+ <span class="os-tag" style="background:#dcfce7;color:#15803d">✅ 省額度 · 一次到位</span>
+ <pre>你是我的網頁助理。讀 content/ 資料夾，
+做自我介紹單頁 index.html + style.css：
+<span class="s">- 版面簡潔、手機也看得清楚
+- 內容 about / skills / contact 三段
+- 淺色、圓角卡片
+- 不要編造我沒寫的經歷</span>
+最後列出你改了哪些檔案。</pre>
+ </div>
+ </div>
+ <div class="callout rule"><span class="lead">差在哪</span>同一個需求 → 左邊來回 <b>8 次</b>、右邊 <b>1 次</b>到位。祕訣：一開始就把「<b>目標＋限制＋輸出格式</b>」講清楚。</div>
+</section>
+<section class="slide" data-sec="Part 3 · 裝工具" style="--accent:var(--p3);--accentb:var(--p3b)">
+ <span class="kicker">另一個免費 AI 助手</span>
+ <h2>VS Code 內建：GitHub Copilot Chat 💬</h2>
+ <div class="accent-bar"></div>
+ <div class="cards">
+ <div class="card"><div class="ico">💬</div><h4>在編輯器裡問 AI</h4><p>側邊聊天面板，直接叫它讀你的程式碼、解釋、幫你改</p></div>
+ <div class="card"><div class="ico">🆓</div><h4>免費版</h4><p>每月約 <b>2,000 次補全 + 50 則 chat</b>，免信用卡</p></div>
+ <div class="card"><div class="ico">🔑</div><h4>用 GitHub 帳號登入</h4><p>模型自動選（含 Claude、GPT 系列）</p></div>
+ </div>
+ <div class="callout rule"><span class="lead">怎麼開</span>VS Code → 用 <b>GitHub 帳號</b>登入 Copilot → 按 <b>Ctrl+Alt+I</b>（或點側邊聊天圖示）開聊天。<b>agy 額度用完</b>、或想直接在編輯器裡改程式時，就用它。</div>
+</section>
+<section class="slide divider dark" data-sec="Part 4 · 做出來" style="--accent:var(--p4);--accentb:var(--p4b)">
+ <div class="num">04</div>
+ <h1>動手實作</h1>
+ <div class="accent-bar"></div>
+ <p>讓 Agent 讀你的資料夾、規劃、產生檔案</p>
+</section>
+<section class="slide" data-sec="Part 4 · 做出來" style="--accent:var(--p4);--accentb:var(--p4b)">
+ <span class="kicker">實作一 · 步驟 1</span>
+ <h2>建立你的學習資料夾 📁</h2>
+ <div class="accent-bar"></div>
+ <div class="twocol">
+ <div>
+ <span class="os-tag win">🪟 Windows · PowerShell</span>
+ <pre><span class="k">mkdir</span> ai-agent-demo
+<span class="k">cd</span> ai-agent-demo
+<span class="k">mkdir</span> notes
+<span class="k">mkdir</span> output
+<span class="k">New-Item</span> notes/week1.md</pre>
+ </div>
+ <div>
+ <span class="os-tag mac">🍎 macOS / Linux</span>
+ <pre><span class="k">mkdir</span> ai-agent-demo
+<span class="k">cd</span> ai-agent-demo
+<span class="k">mkdir</span> notes output
+<span class="k">touch</span> notes/week1.md</pre>
+ </div>
+ </div>
+ <p class="sub">打開 <code class="inline">notes/week1.md</code>，先自己寫幾行今天學到的重點（LLM、Agent、CLI、風險）。</p>
+</section>
+<section class="slide" data-sec="Part 4 · 做出來" style="--accent:var(--p4);--accentb:var(--p4b)">
+ <span class="kicker">實作一 · 步驟 2</span>
+ <h2>交給 Agent 的第一個任務 ✨</h2>
+ <div class="accent-bar"></div>
+ <p>在 <code class="inline">agy</code> 裡輸入：</p>
+ <pre><span class="c"># 貼進 Antigravity CLI</span>
+請閱讀 notes 資料夾，幫我產生 output/summary.md。
+內容包含：100 字摘要、5 個關鍵詞、3 個我還想深入了解的問題。
+<span class="s">不要加入 notes 裡沒有提到的事實。</span></pre>
+ <p>完成後在終端機檢查它做了什麼：</p>
+ <pre><span class="k">ls</span> output
+<span class="k">cat</span> output/summary.md <span class="c"># Windows 也能用 cat</span></pre>
+</section>
+<section class="slide" data-sec="Part 4 · 做出來" style="--accent:var(--p4);--accentb:var(--p4b)">
+ <span class="kicker">實作二 · Human-in-the-loop</span>
+ <h2>讓 Agent「先計畫、再執行」🙋</h2>
+ <div class="accent-bar"></div>
+ <div class="twocol">
+ <div>
+ <p class="sub">① 先要計畫，別急著改檔</p>
+ <pre>你是我的學習助理。<span class="s">請先提出計畫，不要直接改檔。</span>
+目標：準備一份 3 分鐘口頭報告，
+主題是「AI Agent 對職場工作的
+幫助與風險」。
+請說明你會讀哪些檔、產出哪些檔、
+如何檢查品質。</pre>
+ </div>
+ <div>
+ <p class="sub">② 看完計畫，同意才放行</p>
+ <pre>同意。請依剛才的計畫執行，
+最後列出你<span class="s">新增或修改</span>了哪些檔案。</pre>
+ <p class="sub" style="margin-top:.6em">產出三個檔：</p>
+ <ul class="big" style="font-size:.8em">
+ <li>output/talk-outline.md</li>
+ <li>output/speaker-script.md</li>
+ <li>output/checklist.md</li>
+ </ul>
+ </div>
+ </div>
+</section>
+<section class="slide" data-sec="Part 4 · 做出來" style="--accent:var(--p4);--accentb:var(--p4b)">
+ <span class="kicker">進階 · 只講概念（可選）</span>
+ <h2>API key：程式呼叫 AI 的門禁卡 🪪</h2>
+ <div class="accent-bar"></div>
+ <div class="twocol">
+ <div>
+ <ul class="big" style="font-size:.9em">
+ <li>CLI 是<b>人</b>用的介面</li>
+ <li>API 是<b>程式</b>呼叫 AI 的方式</li>
+ <li>API key 是<b>憑證</b>，不是程式碼的一部分</li>
+ <li>做 App 時放<b>環境變數或後端</b>，絕不放前端</li>
+ </ul>
+ </div>
+ <div>
+ <span class="os-tag win">🪟 Windows · 設定金鑰</span>
+ <pre><span class="k">$env:</span>ANTIGRAVITY_API_KEY=<span class="s">"你的 key"</span>
+<span class="k">agy</span></pre>
+ <p class="sub">金鑰從 <b>Google AI Studio</b> 申請。變數名是新的 <code class="inline">ANTIGRAVITY_API_KEY</code>（不是舊的 GEMINI_API_KEY）。</p>
+ </div>
+ </div>
+</section>
+<section class="slide" data-sec="Part 4 · 做出來" style="--accent:var(--p4);--accentb:var(--p4b)">
+ <span class="kicker">如果你真的申請了金鑰</span>
+ <h2>API key 的五個「不要」🚫</h2>
+ <div class="accent-bar"></div>
+ <ul class="big">
+ <li>不要<b>截圖</b>金鑰</li>
+ <li>不要貼到 <b>Line / Discord / Telegram</b></li>
+ <li>不要放進 <b>GitHub</b></li>
+ <li>不要寫死在<b>前端網頁</b></li>
+ <li>懷疑外洩 → 立刻到 AI Studio <b>刪除並重建</b></li>
+ </ul>
+ <div class="callout rule"><span class="lead">示範用</span><code class="inline">.env.example</code> 裡只放 <code class="inline">ANTIGRAVITY_API_KEY=put_your_key_here</code>，永遠<b>不放真 key</b>。</div>
+</section>
+<section class="slide" data-sec="Part 4 · 做出來" style="--accent:var(--p4);--accentb:var(--p4b)">
+ <span class="kicker">小練習</span>
+ <h2>把同一個問題，寫成三種 prompt ✍️</h2>
+ <div class="accent-bar"></div>
+ <div class="cards">
+ <div class="card" style="--accent:#dc2626"><div class="ico">1️⃣</div><h4>模糊版</h4><p>「幫我讀 AI」</p></div>
+ <div class="card" style="--accent:var(--p3)"><div class="ico">2️⃣</div><h4>有上下文版</h4><p>「我剛進公司，主管要我下週交一份 800 字的 AI 工具評估…」</p></div>
+ <div class="card" style="--accent:var(--p4)"><div class="ico">3️⃣</div><h4>有輸出版</h4><p>「請用三段式摘要＋3 個關鍵詞＋2 個問題輸出…」</p></div>
+ </div>
+ <p class="sub" style="margin-top:.8em">感受一下：越往右，AI 的回答越穩、越好用。</p>
+</section>
+<section class="slide divider dark" data-sec="收尾" style="--accent:var(--p1);--accentb:var(--p2b)">
+ <div class="num">✓</div>
+ <h1>收尾與作業</h1>
+ <div class="accent-bar"></div>
+ <p>把今天學到的變成你自己的東西</p>
+</section>
+<section class="slide" data-sec="收尾" style="--accent:var(--p2);--accentb:var(--p2b)">
+ <span class="kicker">結束前，回答三題</span>
+ <h2>Exit Ticket 🎫</h2>
+ <div class="accent-bar"></div>
+ <ul class="big">
+ <li>用<b>一句話</b>解釋什麼是 AI Agent</li>
+ <li>寫出一個你<b>會</b>交給 agent 的任務</li>
+ <li>寫出一個你<b>不該</b>交給 agent 的資料或權限</li>
+ </ul>
+</section>
+<section class="slide" data-sec="收尾" style="--accent:var(--p4);--accentb:var(--p4b)">
+ <span class="kicker">課後作業</span>
+ <h2>做一個「自我介紹網站」🌐</h2>
+ <div class="accent-bar"></div>
+ <p style="margin-bottom:.3em">用 <code class="inline">agy</code> 讀你寫的 md，產生一個能在瀏覽器打開的個人網站。</p>
+ <div class="twocol">
+ <div>
+ <p class="sub">📝 你要寫的 md（內容素材）</p>
+ <ul class="big" style="font-size:.8em">
+ <li><code class="inline">content/about.md</code> — 我是誰</li>
+ <li><code class="inline">content/skills.md</code> — 我會什麼</li>
+ <li><code class="inline">content/contact.md</code> — 怎麼找我</li>
+ <li><code class="inline">content/projects.md</code> —（選填）作品</li>
+ </ul>
+ </div>
+ <div>
+ <p class="sub">🤖 流程與交付</p>
+ <ul class="big" style="font-size:.8em">
+ <li><code class="inline">plan.md</code> — 請 agent 先出建置計畫</li>
+ <li><code class="inline">index.html</code> / <code class="inline">style.css</code> — agent 產生</li>
+ <li><code class="inline">README.md</code> — 怎麼打開</li>
+ <li><code class="inline">reflection.md</code>（300字）— AI 做了什麼？我檢查了什麼</li>
+ </ul>
+ </div>
+ </div>
+ <div class="callout rule"><span class="lead">prompt 範例</span>「讀 <code class="inline">content/</code> 資料夾，幫我做一個自我介紹單頁 <code class="inline">index.html</code> + <code class="inline">style.css</code>，簡潔、手機也看得清楚。<b>不要編造我沒寫的經歷。</b>」 最後交一個資料夾（GitHub repo 或 zip）。</div>
+</section>
+<section class="slide" data-sec="收尾" style="--accent:var(--p4);--accentb:var(--p4b)">
+ <span class="kicker">把成果放上網</span>
+ <h2>免費上線：GitHub Pages 🚀</h2>
+ <div class="accent-bar"></div>
+ <div class="twocol" style="align-items:center">
+ <div>
+ <ol class="steps">
+ <li>把作業資料夾（含 <code class="inline">index.html</code>）push 到 GitHub repo<br><span class="sub">例：<code class="inline">myportfolio</code></span></li>
+ <li>進 repo → <b>Settings</b> → 左側 <b>Pages</b></li>
+ <li>Source 選 <b>Deploy from a branch</b></li>
+ <li>Branch 選 <b>main</b>、資料夾 <b>/ (root)</b> → 按 <b>Save</b></li>
+ <li>等 1–2 分鐘，網址出現 → 打開就是你的網站 ✅</li>
+ </ol>
+ </div>
+ <div>
+ <div class="ghp">
+ <p style="font-weight:800; color:#1f2328; margin-bottom:.2em">Build and deployment</p>
+ <div class="row"><span class="lbl">Source</span><span class="ghsel">Deploy from a branch</span></div>
+ <div class="row"><span class="lbl">Branch</span><span class="ghsel">main</span><span class="ghsel">/ (root)</span><span class="ghsave">Save</span></div>
+ </div>
+ <p class="sub" style="margin-top:12px">網址格式：<code class="inline">https://帳號.github.io/repo名/</code></p>
+ </div>
+ </div>
+ <div class="callout rule"><span class="lead">上線前檢查</span>首頁檔名一定是 <code class="inline">index.html</code>；圖片、CSS 用<b>相對路徑</b>（<code class="inline">leo.jpg</code>、<code class="inline">style.css</code>），不要用 <code class="inline">D:\…</code> 本機路徑，否則上線後抓不到。</div>
+</section>
+<section class="slide" data-sec="收尾" style="--accent:var(--p4);--accentb:var(--p4b)">
+ <span class="kicker">示範成果</span>
+ <h2>LEO ｜ Senior Product Manager Portfolio 🌐</h2>
+ <div class="accent-bar"></div>
+ <div class="twocol" style="align-items:center">
+ <div class="ghframe">
+ <div class="ghbar">
+ <span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span>
+ <span class="url">leolinleo1200.github.io/myportfolio</span>
+ </div>
+ <div class="ghbody">
+ <p style="font-size:.78em; opacity:.75; letter-spacing:2px">SENIOR PRODUCT MANAGER</p>
+ <p style="font-size:1.5em; font-weight:900; line-height:1.15; margin:.15em 0 .5em">我是 Leo<br>引領產品從 0 到 1</p>
+ <div style="display:flex; gap:7px; flex-wrap:wrap; font-size:.72em">
+ <span style="background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); padding:4px 11px; border-radius:999px">關於我</span>
+ <span style="background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); padding:4px 11px; border-radius:999px">產品理念</span>
+ <span style="background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); padding:4px 11px; border-radius:999px">專案路徑</span>
+ <span style="background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); padding:4px 11px; border-radius:999px">專業技能</span>
+ <span style="background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); padding:4px 11px; border-radius:999px">與我聯絡</span>
+ </div>
+ </div>
+ </div>
+ <div>
+ <p>用 <code class="inline">agy</code> 產生 → push 上 GitHub → 開 Pages，這就是上線後的真實成果。</p>
+ <p class="sub" style="margin-top:.5em">👉 直接點開看看（手機掃也行）：</p>
+ <a class="qrlink" href="https://leolinleo1200.github.io/myportfolio/" style="display:inline-block; margin-top:.35em; color:var(--p4); background:#ecfdf5">leolinleo1200.github.io/myportfolio</a>
+ </div>
+ </div>
+</section>
+<section class="slide cover" data-sec="收尾">
+ <span class="badge">參考資料</span>
+ <h1 style="font-size:clamp(30px,5vw,58px)">謝謝，開始動手吧！🚀</h1>
+ <div class="meta" style="margin-top:1.2em; line-height:2">
+ ▸ Antigravity CLI 產品頁：antigravity.google/product/antigravity-cli<br>
+ ▸ 官方教學 Codelabs：codelabs.developers.google.com（Hands-on with Antigravity CLI）<br>
+ ▸ 方案定價：antigravity.google/pricing ・下載：antigravity.google/download<br>
+ ▸ GitHub Copilot（免費版）：github.com/features/copilot<br>
+ ▸ 影片：李宏毅老師《生成式人工智慧與機器學習導論 2025・第 1 講》 youtu.be/TigfpYPJk1s<br>
+ ▸ 課程頁：speech.ee.ntu.edu.tw/~hylee/ml/2025-spring.php
+ </div>
+ <div class="meta" style="margin-top:1.4em; color:#94a3b8; font-size:.8em">AI 產生內容，人負責檢查 · 2026-07-20</div>
+</section>
+</div>
+<button class="nav-btn prev" id="btnPrev" aria-label="前一頁">‹</button>
+<button class="nav-btn next" id="btnNext" aria-label="後一頁">›</button>
+<div class="hint" id="hint">← → · 滾輪換頁 · 點章節名或頁碼可跳頁 · F 全螢幕</div>
+<div class="bar">
+ <span class="seclabel" id="seclabel" title="點我跳章節">開場</span>
+ <span class="bar-nav">
+ <button class="bar-btn" id="barPrev">‹ 前頁</button>
+ <span class="count" id="count" title="點我看全部頁面"><span id="cur">1</span> / <span id="total">33</span></span>
+ <button class="bar-btn" id="barNext">後頁 ›</button>
+ </span>
+ <a class="demolink" href="https://leolinleo1200.github.io/myportfolio/" target="_blank" rel="noopener">🌐 示範站 ↗</a>
+</div>
+<div class="chapmenu" id="chapmenu"></div>
+<div class="overlay" id="overlay">
+ <div class="ov-head"><h3>跳到頁面 / 章節</h3><button class="ov-close" id="ovClose" aria-label="關閉">✕</button></div>
+ <div id="ovBody"></div>
+</div>
+<script>
+ const slides = Array.from(document.querySelectorAll('.slide'));
+ const total = slides.length;
+ let i = 0;
+ const progress = document.getElementById('progress');
+ const curEl = document.getElementById('cur');
+ const totalEl = document.getElementById('total');
+ const secEl = document.getElementById('seclabel');
+ const hint = document.getElementById('hint');
+ const btnPrev = document.getElementById('btnPrev');
+ const btnNext = document.getElementById('btnNext');
+ const barPrev = document.getElementById('barPrev');
+ const barNext = document.getElementById('barNext');
+ totalEl.textContent = total;
+ function show(n){
+ i = Math.max(0, Math.min(total - 1, n));
+ slides.forEach((s, k) => s.classList.toggle('active', k === i));
+ const s = slides[i];
+ curEl.textContent = i + 1;
+ secEl.textContent = s.dataset.sec || '';
+ const accent = getComputedStyle(s).getPropertyValue('--accent').trim() || '#7c3aed';
+ document.documentElement.style.setProperty('--accent', accent);
+ progress.style.width = ((i + 1) / total * 100) + '%';
+ progress.style.background = 'linear-gradient(90deg,' + accent + ',' + accent + ')';
+ btnPrev.disabled = barPrev.disabled = (i === 0);
+ btnNext.disabled = barNext.disabled = (i === total - 1);
+ markCurrent();
+ }
+ function next(){ show(i + 1); }
+ function prev(){ show(i - 1); }
+ [btnPrev, barPrev].forEach(b => b.addEventListener('click', e => { e.stopPropagation(); prev(); }));
+ [btnNext, barNext].forEach(b => b.addEventListener('click', e => { e.stopPropagation(); next(); }));
+ const chapmenu = document.getElementById('chapmenu');
+ const overlay = document.getElementById('overlay');
+ const ovBody = document.getElementById('ovBody');
+ const ovClose = document.getElementById('ovClose');
+ const countEl = document.getElementById('count');
+ function slideTitle(s){
+ const h = s.querySelector('h2, h1');
+ return h ? h.textContent.trim() : (s.dataset.sec || '（無標題）');
+ }
+ const chapters = [];
+ slides.forEach((s, idx) => {
+ const sec = s.dataset.sec || '';
+ const last = chapters[chapters.length - 1];
+ if(!last || last.sec !== sec) chapters.push({ sec, start: idx });
+ });
+ chapters.forEach(c => {
+ const b = document.createElement('button');
+ b.dataset.idx = c.start;
+ b.innerHTML = '<span>' + c.sec + '</span><span class="pg">p.' + (c.start + 1) + '</span>';
+ b.addEventListener('click', () => { show(c.start); closeMenus(); });
+ chapmenu.appendChild(b);
+ });
+ chapters.forEach((c, ci) => {
+ const end = (ci + 1 < chapters.length) ? chapters[ci + 1].start : total;
+ const h = document.createElement('div');
+ h.className = 'ov-sec';
+ h.textContent = c.sec;
+ ovBody.appendChild(h);
+ const grid = document.createElement('div');
+ grid.className = 'ov-grid';
+ for(let k = c.start; k < end; k++){
+ const it = document.createElement('button');
+ it.className = 'ov-item';
+ it.dataset.idx = k;
+ it.innerHTML = '<span class="pg">' + (k + 1) + '</span><span>' + slideTitle(slides[k]) + '</span>';
+ it.addEventListener('click', () => { show(k); closeMenus(); });
+ grid.appendChild(it);
+ }
+ ovBody.appendChild(grid);
+ });
+ function currentChapterStart(){
+ let start = 0;
+ chapters.forEach(c => { if(c.start <= i) start = c.start; });
+ return start;
+ }
+ function markCurrent(){
+ const cs = currentChapterStart();
+ chapmenu.querySelectorAll('button').forEach(b => b.classList.toggle('cur', +b.dataset.idx === cs));
+ ovBody.querySelectorAll('.ov-item').forEach(b => b.classList.toggle('cur', +b.dataset.idx === i));
+ }
+ function closeMenus(){ chapmenu.classList.remove('open'); overlay.classList.remove('open'); }
+ secEl.addEventListener('click', e => {
+ e.stopPropagation();
+ overlay.classList.remove('open');
+ markCurrent();
+ chapmenu.classList.toggle('open');
+ });
+ countEl.addEventListener('click', e => {
+ e.stopPropagation();
+ chapmenu.classList.remove('open');
+ markCurrent();
+ overlay.classList.toggle('open');
+ });
+ ovClose.addEventListener('click', closeMenus);
+ overlay.addEventListener('click', e => { if(e.target === overlay) closeMenus(); });
+ document.addEventListener('click', e => {
+ if(chapmenu.classList.contains('open') && !chapmenu.contains(e.target) && e.target !== secEl){
+ chapmenu.classList.remove('open');
+ }
+ });
+ document.addEventListener('keydown', e => {
+ if(['ArrowRight','ArrowDown','PageDown'].includes(e.key)){ e.preventDefault(); next(); }
+ else if(['ArrowLeft','ArrowUp','PageUp','Backspace'].includes(e.key)){ e.preventDefault(); prev(); }
+ else if(e.key === 'Home'){ show(0); }
+ else if(e.key === 'End'){ show(total - 1); }
+ else if(e.key === 'f' || e.key === 'F'){
+ if(!document.fullscreenElement){ document.documentElement.requestFullscreen(); }
+ else { document.exitFullscreen(); }
+ }
+ else if(e.key === 'o' || e.key === 'O'){ chapmenu.classList.remove('open'); markCurrent(); overlay.classList.toggle('open'); }
+ else if(e.key === 'Escape'){ closeMenus(); }
+ });
+ let wheelLock = false;
+ window.addEventListener('wheel', e => {
+ if(wheelLock) return;
+ if(Math.abs(e.deltaY) < 12) return;
+ const pre = e.target.closest('pre');
+ if(pre && pre.scrollHeight > pre.clientHeight + 2) return;
+ wheelLock = true;
+ setTimeout(() => { wheelLock = false; }, 450);
+ (e.deltaY > 0) ? next() : prev();
+ }, { passive:true });
+ setTimeout(() => { hint.style.opacity = '0'; }, 4000);
+ show(0);
+</script>
+</body>
+</html>
