@@ -30,7 +30,7 @@
  .chips{margin-top:1.5em; display:flex; gap:10px; flex-wrap:wrap}
  .chip{padding:7px 15px; border-radius:12px; background:rgba(255,255,255,.08);
  border:1px solid rgba(255,255,255,.18); font-size:clamp(13px,1.6vw,17px)}
- .cards{margin-top:2.4em; display:grid; grid-template-columns:1fr 1fr; gap:20px}
+ .cards{margin-top:2.4em; display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px}
  @media (max-width:720px){ .cards{grid-template-columns:1fr} }
  .card{display:block; text-decoration:none; color:inherit; border-radius:20px; padding:26px 26px 24px;
  background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.14); border-top:5px solid var(--accent);
@@ -69,6 +69,12 @@
  <h2>示範作品站</h2>
  <p>LEO ｜ Senior Product Manager Portfolio——用 <b>agy</b> 產生、GitHub Pages 上線的成果，就是課後作業「自我介紹網站」的示範。</p>
  <span class="go">看示範站</span>
+ </a>
+ <a class="card" href="https://52.68.149.115/" target="_blank" rel="noopener" style="--accent:var(--p2);--accentb:var(--p2b)">
+ <div class="ico">🚀</div>
+ <h2>DEMO 站</h2>
+ <p>課堂實作的線上 DEMO，點擊直接開啟體驗。</p>
+ <span class="go">開啟 DEMO</span>
  </a>
  </div>
 
