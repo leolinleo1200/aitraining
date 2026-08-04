@@ -108,6 +108,14 @@
  .stat{display:flex; justify-content:space-between; font-size:.85em; color:#334155; font-weight:700; margin-top:5px}
  .bar{height:8px; background:#eef2f7; border-radius:999px; overflow:hidden}
  .bar>i{display:block; height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2))}
+ .codebox{background:#0b1220; color:#e2e8f0; border-radius:8px; padding:16px 20px; font-family:"Cascadia Code",Consolas,monospace; font-size:clamp(13px,1.55vw,19px); line-height:1.5; white-space:pre-wrap; overflow:auto}
+ .codebox .c{color:#7dd3fc}
+ .codebox .k{color:#fca5a5}
+ .stateflow{display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:.1em 0 .7em}
+ .st{padding:7px 20px; border-radius:999px; font-weight:800; font-size:clamp(15px,1.9vw,23px); border:2px solid var(--accent); color:var(--accent); background:#fff}
+ .st.on{background:var(--accent); color:#fff}
+ .defsplit{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+ @media (max-width:860px){.defsplit{grid-template-columns:1fr}}
  .split{display:grid; grid-template-columns:1.05fr .95fr; gap:34px; align-items:center}
  @media (max-width:880px){.split{grid-template-columns:1fr}}
  .portrait{width:100%; max-height:70vh; object-fit:contain; border-radius:8px; border:1px solid var(--line); background:#fff}
@@ -242,8 +250,8 @@
    <div class="card"><span class="tag">規劃</span><h4>產品定義書</h4><p>一句話講清楚：為誰、解決什麼問題。</p></div>
    <div class="card"><span class="tag">需求</span><h4>User Story</h4><p>從使用者角度：他想做什麼、為了什麼。</p></div>
    <div class="card"><span class="tag">需求</span><h4>功能規格表</h4><p>把故事拆成可執行的功能、規則、優先度。</p></div>
-   <div class="card"><span class="tag">設計</span><h4>架構圖</h4><p>資料、邏輯、畫面三層怎麼分工。</p></div>
-   <div class="card"><span class="tag">設計</span><h4>畫面示意圖</h4><p>每一頁大概長什麼樣、放哪些東西。</p></div>
+   <div class="card"><span class="tag">設計</span><h4>架構圖 & 資料模型</h4><p>三層怎麼分工，資料結構長什麼樣。</p></div>
+   <div class="card"><span class="tag">設計</span><h4>狀態流 & 畫面示意</h4><p>狀態怎麼流動，每頁大概長什麼樣。</p></div>
    <div class="card"><span class="tag">素材</span><h4>素材清單</h4><p>資料與內容從哪裡來、怎麼整理。</p></div>
   </div>
  </section>
@@ -307,9 +315,20 @@
   <p class="sub" style="margin-top:.5em">P0＝MVP 必做、P1＝接著做、P2＝有空再做。優先度讓你知道<b>先做什麼</b>。</p>
  </section>
 
+ <section class="slide" data-sec="定義 vs 設計" style="--accent:var(--violet);--accent2:var(--cyan)">
+  <span class="kicker">STEP 3 · DESIGN</span>
+  <h2>先分清楚：定義 vs 設計</h2>
+  <div class="barline"></div>
+  <div class="defsplit">
+   <div class="card"><h4>定義：要有什麼</h4><p>系統要存哪些<b>資料</b>、要做哪些<b>事</b>。對應資料模型與功能規格。</p></div>
+   <div class="card"><h4>設計：怎麼組起來</h4><p>資料、邏輯、畫面怎麼<b>分層</b>，狀態怎麼<b>流動</b>，操作怎麼<b>跑一遍</b>。</p></div>
+  </div>
+  <p class="sub" style="margin-top:.9em">今天的「設計」＝<b>架構圖 ＋ 資料模型 ＋ 狀態流 ＋ 畫面示意</b>，四張攤開就是一份可交付的架構。</p>
+ </section>
+
  <section class="slide" data-sec="架構圖" style="--accent:var(--violet);--accent2:var(--green)">
   <span class="kicker">STEP 3 · DESIGN · 架構圖</span>
-  <h2>設計：把 App 拆成三層架構</h2>
+  <h2>三層式架構：畫面、邏輯、資料</h2>
   <div class="barline"></div>
   <div class="arch">
    <div class="layer top"><h4>畫面層　<span style="font-weight:400;color:#94a3b8;font-size:.7em">看得到、點得到的</span></h4><div class="tags"><span>首頁</span><span>單字卡</span><span>測驗頁</span><span>複習頁</span><span>進度頁</span><span>設定頁</span></div></div>
@@ -318,6 +337,47 @@
    <div class="archv">▼ 讀取 / 寫入　　　▲ 回傳資料</div>
    <div class="layer bot"><h4>資料層　<span style="font-weight:400;color:#94a3b8;font-size:.7em">存起來的東西</span></h4><div class="tags"><span>單字</span><span>中文解釋</span><span>例句</span><span>程度</span><span>學習狀態</span><span>答題紀錄</span></div></div>
   </div>
+  <p class="sub" style="margin-top:.7em">走一次：按〔送出答案〕→ <b>畫面層</b>送出 → <b>邏輯層</b>判對錯、更新熟悉度 → <b>資料層</b>寫入紀錄 → 回<b>畫面層</b>更新進度。</p>
+ </section>
+
+ <section class="slide" data-sec="資料模型" style="--accent:var(--cyan);--accent2:var(--violet)">
+  <span class="kicker">STEP 3 · DESIGN · 資料模型</span>
+  <h2>資料層長什麼樣？先定資料結構</h2>
+  <div class="barline"></div>
+  <div class="split">
+   <pre class="codebox"><span class="c">// 內容：單字本身（大家共用）</span>
+{ "id": 1, "word": "abandon", "pos": "v.",
+  "zh": "放棄；拋棄",
+  "example": "Don't abandon your plan.",
+  "level": 1 }
+
+<span class="c">// 狀態：每個人的學習進度</span>
+{ "wordId": 1, "status": "學習中",
+  "wrongCount": 2, "lastReview": "2026-08-04" }</pre>
+   <div>
+    <ul class="list">
+     <li>把資料切成<b>「內容」</b>（單字本身）與<b>「狀態」</b>（每個人的進度）兩種。</li>
+     <li>內容大家共用；狀態每個使用者一份。</li>
+     <li>資料結構定了，邏輯層才有東西可以算。</li>
+    </ul>
+   </div>
+  </div>
+ </section>
+
+ <section class="slide" data-sec="狀態流" style="--accent:var(--amber);--accent2:var(--rose)">
+  <span class="kicker">STEP 3 · DESIGN · 狀態流</span>
+  <h2>狀態怎麼流動？畫出狀態機</h2>
+  <div class="barline"></div>
+  <div class="stateflow">
+   <span class="st">未學</span><span class="st">學習中</span><span class="st">待複習</span><span class="st on">已熟悉</span>
+  </div>
+  <ul class="list">
+   <li><b>未學</b> →〔開始學習〕→ <b>學習中</b></li>
+   <li><b>學習中</b> →〔連續答對 3 次〕→ <b>已熟悉</b> ✅</li>
+   <li><b>學習中</b> →〔答錯〕→ <b>待複習</b></li>
+   <li><b>待複習</b> →〔重測答對〕→ <b>學習中</b></li>
+  </ul>
+  <p class="sub" style="margin-top:.5em">規則寫死，AI 才不會亂猜——這就是<b>邏輯層</b>要實作的東西。</p>
  </section>
 
  <section class="slide" data-sec="畫面示意" style="--accent:var(--rose);--accent2:var(--cyan)">
@@ -357,6 +417,48 @@
   <p class="sub" style="margin-top:.6em">重點是<b>結構與流程</b>，不是美感——下一堂用 Stitch 才把它變成真的介面。</p>
  </section>
 
+ <section class="slide" data-sec="UI/UX 原則" style="--accent:var(--rose);--accent2:var(--amber)">
+  <span class="kicker">DESIGN · UI/UX 原則</span>
+  <h2>畫示意時，守住四個 UX 原則</h2>
+  <div class="barline"></div>
+  <div class="grid two">
+   <div class="card"><h4>視覺層級</h4><p>最重要的先被看到——今天要背的字最大、最顯眼。</p></div>
+   <div class="card"><h4>留白聚焦</h4><p>一頁一個主要任務，別把功能全塞在同一畫面。</p></div>
+   <div class="card"><h4>即時回饋</h4><p>答對、答錯、標記熟悉，畫面要馬上有反應。</p></div>
+   <div class="card"><h4>一致性</h4><p>同樣的東西長一樣、放一樣的位置，使用者不用重學。</p></div>
+  </div>
+ </section>
+
+ <section class="slide" data-sec="UI/UX 案例" style="--accent:var(--cyan);--accent2:var(--green)">
+  <span class="kicker">DESIGN · UI/UX 案例</span>
+  <h2>案例：同一頁，改前 vs 改後</h2>
+  <div class="barline"></div>
+  <div class="mocks" style="grid-template-columns:repeat(2,1fr); max-width:520px; margin:0 auto">
+   <div class="phone">
+    <div class="notch"></div><div class="cap" style="color:var(--rose)">改前 · 太擠</div>
+    <div class="scr">
+     <div class="ui" style="font-size:.78em; line-height:1.3">abandon /əˈbæn.dən/ v. 放棄；拋棄 · Don't abandon your plan. · 同義詞 give up · 反義詞 keep</div>
+     <div class="ui" style="font-size:.78em">筆記、標籤、來源、相關字…</div>
+     <div class="row"><div class="btn ghost">上一個</div><div class="btn ghost">下一個</div></div>
+     <div class="row"><div class="btn ghost">收藏</div><div class="btn ghost">筆記</div></div>
+     <div class="row"><div class="btn ghost">分享</div><div class="btn ghost">設定</div></div>
+    </div>
+   </div>
+   <div class="phone">
+    <div class="notch"></div><div class="cap" style="color:var(--green)">改後 · 清楚</div>
+    <div class="scr">
+     <div class="ui word" style="margin-top:auto"><span class="pos">v. 動詞</span><b>abandon</b><span class="zh">放棄；拋棄</span><span class="ex">Don't abandon your plan.</span></div>
+     <div class="row" style="margin-top:auto"><div class="btn ghost">還不熟</div><div class="btn">已熟悉</div></div>
+    </div>
+   </div>
+  </div>
+  <ul class="list" style="margin-top:.6em">
+   <li><b>放大主角</b>：讓「要背的字」最先被看到。</li>
+   <li><b>砍掉雜訊</b>：一頁一個任務，次要功能先收起來。</li>
+   <li><b>留關鍵動作</b>：只保留「還不熟 / 已熟悉」，給清楚回饋。</li>
+  </ul>
+ </section>
+
  <section class="slide" data-sec="素材清單" style="--accent:var(--green);--accent2:var(--amber)">
   <span class="kicker">MATERIALS · 素材清單</span>
   <h2>2000 單字素材怎麼取得？</h2>
@@ -377,25 +479,11 @@
    <div class="card"><h4>產品定義書</h4><p>一句話講清楚為誰、解決什麼問題。</p></div>
    <div class="card"><h4>User Story</h4><p>主要使用者想做什麼、為了什麼價值。</p></div>
    <div class="card"><h4>功能規格表</h4><p>功能、使用者可以…、規則、優先度。</p></div>
-   <div class="card"><h4>架構圖</h4><p>資料 / 邏輯 / 畫面三層怎麼分工。</p></div>
-   <div class="card"><h4>畫面示意圖</h4><p>主要頁面的樣子與操作流程。</p></div>
+   <div class="card"><h4>架構圖 & 資料模型</h4><p>三層式架構，加上資料結構定義。</p></div>
+   <div class="card"><h4>狀態流 & 畫面示意</h4><p>狀態機，加上主要頁面示意圖。</p></div>
    <div class="card"><h4>素材清單 & 範圍</h4><p>資料來源，加上 MVP 先做 / 先不做。</p></div>
   </div>
   <p class="sub" style="margin-top:.7em">這份藍圖就是今天真正的交付物——<b>B2、B3 都會回來翻它。</b></p>
- </section>
-
- <section class="slide" data-sec="6 格框架" style="--accent:var(--green);--accent2:var(--violet)">
-  <span class="kicker">ASKING FRAMEWORK</span>
-  <h2>方法論收斂：問 AI 前先填 6 格</h2>
-  <div class="barline"></div>
-  <div class="grid">
-   <div class="card"><h4>角色</h4><p>要 AI 扮演誰？產品經理、設計師、工程師、助教。</p></div>
-   <div class="card"><h4>目標</h4><p>最後要完成什麼？藍圖、規格表、流程圖、功能清單。</p></div>
-   <div class="card"><h4>受眾</h4><p>誰會使用或觀看？需求會因人而變。</p></div>
-   <div class="card"><h4>素材</h4><p>你已經有什麼？文字、圖片、連結、限制。</p></div>
-   <div class="card"><h4>限制</h4><p>時間、工具、版型、不能用什麼、必須包含什麼。</p></div>
-   <div class="card"><h4>輸出</h4><p>要 Markdown、表格、HTML，還是可執行檔案。</p></div>
-  </div>
  </section>
 
  <section class="slide" data-sec="檢查清單">
@@ -407,7 +495,8 @@
    <li>說得出產品規劃、需求、設計三步各做了什麼。</li>
    <li>2000 單字 App 有一句話產品定義，加上 3 條以上 User Story。</li>
    <li>功能規格表寫好：功能、使用者可以…、規則、優先度。</li>
-   <li>畫出三層架構圖與主要畫面示意，收成一份開發藍圖。</li>
+   <li>畫出三層架構圖、資料模型、狀態流與主要畫面示意。</li>
+   <li>以上全部收成一份開發藍圖，能交給下一堂繼續用。</li>
   </ul>
  </section>
 
@@ -427,7 +516,7 @@
 <button class="nav prev" id="prev" aria-label="上一頁">‹</button>
 <button class="nav next" id="next" aria-label="下一頁">›</button>
 <div class="hint" id="hint">← → · 滾輪換頁 · 點章節名或頁碼可跳頁 · F 全螢幕</div>
-<div class="footer"><strong id="sec" title="點我跳章節">開場</strong><span id="count" title="點我看全部頁面">1 / 20</span></div>
+<div class="footer"><strong id="sec" title="點我跳章節">開場</strong><span id="count" title="點我看全部頁面">1 / 24</span></div>
 <div class="chapmenu" id="chapmenu"></div>
 <div class="overlay" id="overlay">
  <div class="ov-head"><h3>跳到頁面 / 章節</h3><button class="ov-close" id="ovClose" aria-label="關閉">✕</button></div>
