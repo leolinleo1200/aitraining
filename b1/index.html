@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>B1 運用 AI 生成你的第一個應用程式（1）｜產業AI人才培訓</title>
+<style>
+ :root{
+ --violet:#6d28d9; --cyan:#0891b2; --green:#15803d; --amber:#d97706; --rose:#be123c;
+ --ink:#172033; --muted:#65748b; --line:#d9e2ef; --paper:#f7fafc; --white:#fff;
+ --accent:var(--violet); --accent2:var(--cyan);
+ }
+ *{box-sizing:border-box;margin:0;padding:0}
+ html,body{height:100%}
+ body{
+ font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","PingFang TC","Microsoft JhengHei",Arial,sans-serif;
+ color:var(--ink); background:#0b1220; overflow:hidden;
+ }
+ .deck{position:fixed; inset:0}
+ .slide{
+ position:absolute; inset:0; display:none; flex-direction:column; justify-content:center;
+ padding:6vh 8vw 10vh; background:var(--paper); animation:fade .25s ease;
+ }
+ .slide.active{display:flex}
+ @keyframes fade{from{opacity:.4; transform:translateY(10px)} to{opacity:1; transform:none}}
+ h1{font-size:clamp(34px,6.4vw,76px); line-height:1.08}
+ h2{font-size:clamp(26px,4.2vw,50px); line-height:1.14; margin-bottom:.4em}
+ h3{font-size:clamp(19px,2.2vw,27px); color:var(--muted); font-weight:700}
+ p,li{font-size:clamp(17px,2vw,25px); line-height:1.5}
+ b{color:var(--accent)}
+ .kicker{font-size:clamp(13px,1.3vw,16px); font-weight:900; color:var(--accent); letter-spacing:2px; margin-bottom:.7em}
+ .barline{width:74px; height:7px; border-radius:999px; margin:.1em 0 .8em; background:linear-gradient(90deg,var(--accent),var(--accent2))}
+ .sub{color:var(--muted)}
+ .cover{
+ background:linear-gradient(135deg,rgba(11,18,32,.86),rgba(12,74,110,.78)), url("mcuai.jpg") center/cover;
+ color:#fff; justify-content:flex-end;
+ }
+ .cover h1{max-width:980px}
+ .cover .meta{font-size:clamp(17px,2.1vw,26px); color:#dbeafe; margin-top:1em; max-width:900px}
+ .badge{display:inline-block; width:max-content; padding:8px 15px; border-radius:999px; border:1px solid rgba(255,255,255,.28); background:rgba(255,255,255,.14); font-weight:900; margin-bottom:1.2em}
+ .chips{display:flex; flex-wrap:wrap; gap:10px; margin-top:1.4em}
+ .chip{padding:8px 14px; border-radius:10px; background:rgba(255,255,255,.13); border:1px solid rgba(255,255,255,.2); font-size:clamp(14px,1.6vw,18px)}
+ .grid{display:grid; grid-template-columns:repeat(3,1fr); gap:15px}
+ .grid.two{grid-template-columns:repeat(2,1fr)}
+ @media (max-width:860px){.grid,.grid.two{grid-template-columns:1fr}}
+ .card{background:#fff; border:1px solid var(--line); border-top:6px solid var(--accent); border-radius:8px; padding:18px 20px}
+ .card h4{font-size:clamp(18px,2vw,25px); margin-bottom:.3em}
+ .card p,.card li{font-size:clamp(15px,1.6vw,20px); color:#334155}
+ .card .tag{display:inline-block; font-size:clamp(12px,1.2vw,15px); font-weight:900; color:var(--accent); letter-spacing:1px; margin-bottom:.25em}
+ .card.now{box-shadow:0 10px 30px -12px rgba(109,40,217,.55)}
+ .card.now .tag{background:var(--accent); color:#fff; padding:2px 10px; border-radius:999px}
+ .numgrid{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:.4em}
+ @media (max-width:980px){.numgrid{grid-template-columns:repeat(2,1fr)}}
+ .num{background:#fff; border:1px solid var(--line); border-radius:8px; padding:18px}
+ .num strong{display:block; font-size:clamp(30px,4vw,48px); color:var(--accent); line-height:1}
+ .num span{display:block; margin-top:8px; font-size:clamp(15px,1.5vw,18px); color:#334155; line-height:1.35}
+ .prompt{background:#0b1220; color:#e2e8f0; border-radius:8px; padding:18px 20px; font-family:"Cascadia Code",Consolas,monospace; font-size:clamp(15px,1.7vw,21px); line-height:1.55}
+ .prompt em{color:#7dd3fc; font-style:normal}
+ .tpl{background:#fff; border:2px dashed var(--accent); border-radius:10px; padding:16px 22px; font-size:clamp(18px,2.3vw,30px); line-height:1.5; color:#0b1220; font-weight:700}
+ .tpl em{color:var(--accent); font-style:normal; font-weight:900}
+ .flow{display:grid; grid-template-columns:1fr auto 1fr auto 1fr; gap:10px; align-items:stretch; margin-top:.3em}
+ .flow .step{background:#fff; border:1px solid var(--line); border-top:6px solid var(--accent); border-radius:8px; padding:16px 18px}
+ .flow .step h4{font-size:clamp(17px,1.9vw,23px); margin-bottom:.3em}
+ .flow .step p{font-size:clamp(14px,1.55vw,18px); color:#334155}
+ .flow .arrow{display:flex; align-items:center; justify-content:center; font-size:28px; color:var(--accent); font-weight:900}
+ @media (max-width:860px){.flow{grid-template-columns:1fr}.flow .arrow{transform:rotate(90deg); height:24px}}
+ .tbl{width:100%; border-collapse:collapse; margin-top:.3em; background:#fff; border:1px solid var(--line); border-radius:8px; overflow:hidden; font-size:clamp(13px,1.55vw,20px)}
+ .tbl th,.tbl td{border:1px solid var(--line); padding:9px 13px; text-align:left; vertical-align:top}
+ .tbl th{background:var(--accent); color:#fff; font-weight:800}
+ .tbl tr:nth-child(even) td{background:#f7fafc}
+ .tbl .pri{font-weight:900; color:var(--accent); text-align:center; white-space:nowrap}
+ /* 分層架構圖 */
+ .arch{display:flex; flex-direction:column; gap:6px; margin-top:.2em}
+ .layer{border:1px solid var(--line); border-radius:10px; padding:13px 20px; background:#fff}
+ .layer.top{border-top:6px solid var(--cyan)}
+ .layer.mid{border-top:6px solid var(--amber)}
+ .layer.bot{border-top:6px solid var(--green)}
+ .layer h4{font-size:clamp(18px,2vw,25px); margin-bottom:.15em}
+ .layer p{color:#64748b; font-size:clamp(14px,1.5vw,18px)}
+ .layer .tags{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px}
+ .layer .tags span{background:#f1f5f9; border:1px solid var(--line); border-radius:6px; padding:3px 11px; font-size:clamp(13px,1.45vw,17px); color:#334155; font-weight:600}
+ .archv{text-align:center; color:var(--muted); font-size:clamp(12px,1.3vw,15px); font-weight:800; letter-spacing:1px}
+ /* 手機示意圖 */
+ .mocks{display:grid; grid-template-columns:repeat(3,1fr); gap:20px; justify-items:center; margin-top:.2em}
+ @media (max-width:860px){.mocks{grid-template-columns:1fr; gap:16px}}
+ .phone{width:100%; max-width:212px; aspect-ratio:9/17.5; background:#fff; border:3px solid #0b1220; border-radius:26px; padding:12px 11px; display:flex; flex-direction:column; box-shadow:0 16px 40px -18px rgba(11,18,32,.5); font-size:clamp(11px,1.2vw,15px)}
+ .phone .notch{width:38%; height:5px; background:#0b1220; border-radius:999px; margin:0 auto 9px}
+ .phone .cap{font-size:.95em; font-weight:900; color:var(--accent); text-align:center; letter-spacing:1px; margin-bottom:7px}
+ .scr{flex:1; display:flex; flex-direction:column; gap:7px}
+ .dots{display:flex; gap:5px; justify-content:center}
+ .dots i{flex:1; height:5px; border-radius:999px; background:#eef2f7}
+ .dots i.on{background:var(--accent)}
+ .ui{border:1px solid var(--line); border-radius:8px; padding:8px 10px; color:#334155}
+ .ui.word{text-align:center; padding:12px 8px}
+ .ui.word .pos{font-size:.82em; color:var(--accent); font-weight:800}
+ .ui.word b{display:block; font-size:1.7em; color:#0b1220; line-height:1.1; margin:2px 0}
+ .ui.word .ph{display:block; color:var(--muted); font-size:.85em}
+ .ui.word .zh{display:block; margin-top:5px; font-size:1em; color:#0b1220; font-weight:700}
+ .ui.word .ex{display:block; margin-top:5px; font-size:.82em; color:#64748b}
+ .q{font-weight:800; color:#0b1220; font-size:.98em; margin-bottom:2px}
+ .ui.opt.ok{border-color:var(--green); background:#f0fdf4; color:#15803d; font-weight:800}
+ .btn{background:var(--accent); color:#fff; border-radius:8px; padding:8px; text-align:center; font-size:.9em; font-weight:800}
+ .btn.ghost{background:#fff; border:1px solid var(--line); color:#334155}
+ .row{display:flex; gap:7px}
+ .row>*{flex:1}
+ .big{font-size:2.5em; font-weight:900; color:var(--accent); text-align:center; line-height:1}
+ .lbl{text-align:center; color:var(--muted); font-size:.82em; margin-bottom:4px}
+ .stat{display:flex; justify-content:space-between; font-size:.85em; color:#334155; font-weight:700; margin-top:5px}
+ .bar{height:8px; background:#eef2f7; border-radius:999px; overflow:hidden}
+ .bar>i{display:block; height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2))}
+ .split{display:grid; grid-template-columns:1.05fr .95fr; gap:34px; align-items:center}
+ @media (max-width:880px){.split{grid-template-columns:1fr}}
+ .portrait{width:100%; max-height:70vh; object-fit:contain; border-radius:8px; border:1px solid var(--line); background:#fff}
+ .list{display:flex; flex-direction:column; gap:.5em; margin-top:.3em}
+ .list li{list-style:none; padding-left:1.35em; position:relative}
+ .list li:before{content:""; position:absolute; left:0; top:.6em; width:.55em; height:.55em; border-radius:50%; background:var(--accent)}
+ code{background:#eef2f7; border:1px solid var(--line); border-radius:5px; padding:1px 7px; font-family:"Cascadia Code",Consolas,monospace; font-size:.9em; color:#0f172a}
+ .coursenav{position:fixed; left:0; right:0; bottom:46px; z-index:8; display:flex; justify-content:center; align-items:stretch; gap:8px; padding:6px 10px; background:rgba(255,255,255,.9); backdrop-filter:blur(6px); border-top:1px solid var(--line)}
+ .cn{display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:13px; font-weight:800; text-decoration:none; line-height:1.15; padding:3px 15px; border-radius:10px; border:1px solid var(--line); color:#64748b; background:#fff; white-space:nowrap}
+ .cn small{font-size:10px; font-weight:700; color:#94a3b8; letter-spacing:.3px; margin-top:1px}
+ .cn.cur{background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#fff; border-color:transparent}
+ .cn.cur small{color:rgba(255,255,255,.85)}
+ .cn.link{color:var(--accent); border-color:var(--accent)}
+ .cn.link:hover{background:var(--accent); color:#fff}
+ .cn.link:hover small{color:rgba(255,255,255,.85)}
+ .cn.soon{opacity:.45; cursor:default}
+ @media (max-width:560px){.coursenav{gap:6px; padding:5px 6px}.cn{padding:3px 10px; font-size:12px}}
+ .footer{position:fixed; left:0; right:0; bottom:0; height:46px; display:flex; align-items:center; justify-content:space-between; padding:0 18px; border-top:1px solid var(--line); background:rgba(255,255,255,.86); color:#64748b; z-index:8}
+ .progress{position:fixed; left:0; top:0; height:5px; background:linear-gradient(90deg,var(--accent),var(--accent2)); z-index:9; transition:width .2s ease}
+ .nav{position:fixed; top:50%; transform:translateY(-50%); width:48px; height:48px; border:0; border-radius:50%; background:var(--accent); color:#fff; font-size:25px; cursor:pointer; opacity:.55; z-index:10}
+ .nav:hover{opacity:1}
+ .prev{left:18px}.next{right:18px}
+ @media print{body{overflow:auto}.slide{display:flex !important; position:relative; min-height:100vh; page-break-after:always}.footer,.progress,.nav,.coursenav{display:none}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<main class="deck" id="deck">
+
+ <section class="slide cover active" data-sec="開場">
+  <span class="badge">B1 · 2026/8/4（二）14:00–17:00</span>
+  <h1>運用 AI 生成你的第一個應用程式（1）</h1>
+  <p class="meta">先把你的個人網站完成，從中看懂「產品規劃 → 需求 → 設計」的流程，再用同一套方法，替一個 2000 單字 App 畫出開發藍圖。</p>
+  <div class="chips"><span class="chip">產品規劃</span><span class="chip">User Story</span><span class="chip">功能規格表</span><span class="chip">架構圖</span><span class="chip">畫面示意</span></div>
+ </section>
+
+ <section class="slide" data-sec="三堂地圖" style="--accent:var(--violet);--accent2:var(--cyan)">
+  <span class="kicker">COURSE MAP</span>
+  <h2>三堂課，做同一個產品</h2>
+  <div class="barline"></div>
+  <div class="grid">
+   <div class="card now"><span class="tag">B1 · 今天</span><h4>畫藍圖</h4><p>完成個人網站，看懂產品規劃流程，替單字 App 產出開發藍圖。</p></div>
+   <div class="card"><span class="tag">B2 · 8/11</span><h4>做介面</h4><p>User Flow → 線框 →用 Stitch 生介面，串成可點原型。</p></div>
+   <div class="card"><span class="tag">B3 · 8/18</span><h4>做實作</h4><p>設計單字教練聊天機器人與英語測驗，接上 LiveAI Learning。</p></div>
+  </div>
+  <p class="sub" style="margin-top:.9em">三堂共用一個產品——<b>2000 高頻單字 App</b>，走完就是你作品集裡一個完整的專案。</p>
+ </section>
+
+ <section class="slide" data-sec="今日目標" style="--accent:var(--cyan);--accent2:var(--green)">
+  <span class="kicker">TODAY'S DELIVERABLES</span>
+  <h2>今天結束前，要交出什麼？</h2>
+  <div class="barline"></div>
+  <div class="numgrid">
+   <div class="num"><strong>1</strong><span>把個人網站收尾到能公開展示</span></div>
+   <div class="num"><strong>2</strong><span>說得出規劃、需求、設計各在做什麼</span></div>
+   <div class="num"><strong>3</strong><span>寫出 User Story 與功能規格表</span></div>
+   <div class="num"><strong>4</strong><span>交出 2000 單字 App 的開發藍圖</span></div>
+  </div>
+ </section>
+
+ <section class="slide" data-sec="地基" style="--accent:var(--green);--accent2:var(--cyan)">
+  <span class="kicker">FOUNDATION</span>
+  <h2>先把上次的個人網站「完成」</h2>
+  <div class="barline"></div>
+  <p class="sub" style="margin-bottom:.7em">前置課程你已經用 AI 對話做出一版個人網站。今天先把它收尾——不是為了好看，是拿它當「你已經做過一次的產品」，回頭看清楚你其實走過哪些規劃步驟。</p>
+  <div class="grid">
+   <div class="card"><h4>為什麼先做完它</h4><p>你最熟、素材最齊，收尾最快，馬上就有一個能展示的成品。</p></div>
+   <div class="card"><h4>它其實是一個產品</h4><p>有使用者（面試官、合作方）、有目標、有內容結構，麻雀雖小五臟俱全。</p></div>
+   <div class="card"><h4>它是今天的教具</h4><p>用它把抽象的「產品規劃流程」講成你看得到、摸得到的東西。</p></div>
+  </div>
+ </section>
+
+ <section class="slide" data-sec="6 區塊">
+  <span class="kicker">FINISH THE SITE</span>
+  <h2>完成個人網站：6 個必備區塊</h2>
+  <div class="barline"></div>
+  <div class="grid">
+   <div class="card"><h4>首頁第一屏</h4><p>一句話說清楚你是誰、能提供什麼價值。</p></div>
+   <div class="card"><h4>關於我</h4><p>背景、專長、正在學什麼，避免流水帳。</p></div>
+   <div class="card"><h4>作品或經驗</h4><p>用 2–3 個案例展示能力，每個案例都要有成果。</p></div>
+   <div class="card"><h4>技能工具</h4><p>列出你會用的 AI、設計、程式、專案工具。</p></div>
+   <div class="card"><h4>聯絡方式</h4><p>Email、LinkedIn、GitHub、作品連結，讓下一步很清楚。</p></div>
+   <div class="card"><h4>行動呼籲</h4><p>想讓訪客做什麼：聯絡你、下載履歷、看作品、預約聊聊。</p></div>
+  </div>
+ </section>
+
+ <section class="slide" data-sec="Prompt" style="--accent:var(--amber);--accent2:var(--rose)">
+  <span class="kicker">PROMPT TEMPLATE</span>
+  <h2>把任務講完整，AI 才不用猜</h2>
+  <div class="barline"></div>
+  <div class="prompt">你是一位產品設計師與前端工程師。<br>
+請幫我調整並收尾一個個人網站。<br><br>
+<em>目標：</em>讓對方在 60 秒內理解我的專長。<br>
+<em>受眾：</em>企業主管、人資、合作夥伴。<br>
+<em>素材：</em>姓名、照片、3 個作品、技能清單、Email。<br>
+<em>風格：</em>專業、乾淨、容易閱讀。<br>
+<em>輸出：</em>先給我頁面架構，確認後再改 <code>index.html</code>。</div>
+ </section>
+
+ <section class="slide" data-sec="流程揭露" style="--accent:var(--rose);--accent2:var(--violet)">
+  <span class="kicker">THE REAL SKILL</span>
+  <h2>你剛剛做的，就是一套產品流程</h2>
+  <div class="barline"></div>
+  <div class="flow">
+   <div class="step"><h4>產品規劃</h4><p>你決定「為誰、解決什麼、達成什麼」——選面試官當受眾、決定展示作品，就是規劃。</p></div>
+   <div class="arrow">→</div>
+   <div class="step"><h4>需求定義</h4><p>你把每個區塊要放什麼、要達成什麼寫清楚——那就是需求。</p></div>
+   <div class="arrow">→</div>
+   <div class="step"><h4>設計</h4><p>你決定頁面結構、順序、風格——那就是設計。</p></div>
+  </div>
+  <p class="sub" style="margin-top:.9em">差別只在——網站你憑感覺走完；接下來我們要<b>刻意地</b>再走一次，套到一個真正的 App。</p>
+ </section>
+
+ <section class="slide" data-sec="文件總覽" style="--accent:var(--violet);--accent2:var(--amber)">
+  <span class="kicker">THE TOOLKIT</span>
+  <h2>每一步，都會做出一份文件</h2>
+  <div class="barline"></div>
+  <p class="sub" style="margin-bottom:.6em">這些是產品團隊真正在用的文件。今天你會把整套走一遍，做出屬於單字 App 的版本。</p>
+  <div class="grid">
+   <div class="card"><span class="tag">規劃</span><h4>產品定義書</h4><p>一句話講清楚：為誰、解決什麼問題。</p></div>
+   <div class="card"><span class="tag">需求</span><h4>User Story</h4><p>從使用者角度：他想做什麼、為了什麼。</p></div>
+   <div class="card"><span class="tag">需求</span><h4>功能規格表</h4><p>把故事拆成可執行的功能、規則、優先度。</p></div>
+   <div class="card"><span class="tag">設計</span><h4>架構圖</h4><p>資料、邏輯、畫面三層怎麼分工。</p></div>
+   <div class="card"><span class="tag">設計</span><h4>畫面示意圖</h4><p>每一頁大概長什麼樣、放哪些東西。</p></div>
+   <div class="card"><span class="tag">素材</span><h4>素材清單</h4><p>資料與內容從哪裡來、怎麼整理。</p></div>
+  </div>
+ </section>
+
+ <section class="slide" data-sec="規劃" style="--accent:var(--violet);--accent2:var(--cyan)">
+  <span class="kicker">STEP 1 · PLAN</span>
+  <h2>規劃：先問對問題，不要先問「幫我做」</h2>
+  <div class="barline"></div>
+  <div class="grid">
+   <div class="card"><h4>要解決誰的問題？</h4><p>先定義使用者：他在什麼情境、想完成什麼事。</p></div>
+   <div class="card"><h4>要達成什麼？</h4><p>一個產品先解一個核心問題，貪多一定失焦。</p></div>
+   <div class="card"><h4>手上有哪些素材與限制？</h4><p>資料、時間、工具，決定第一版能做到哪裡。</p></div>
+  </div>
+ </section>
+
+ <section class="slide" data-sec="主線登場" style="--accent:var(--cyan);--accent2:var(--amber)">
+  <span class="kicker">THE RUNNING PRODUCT</span>
+  <h2>主線登場：2000 高頻單字 App</h2>
+  <div class="barline"></div>
+  <div class="grid">
+   <div class="card"><h4>它要解決誰的問題</h4><p>想準備英檢、加強職場英文，卻沒時間、背了就忘的人。</p></div>
+   <div class="card"><h4>為什麼用它當範例</h4><p>需求單純、人人都懂英文學習、資料好準備，最適合完整走一次流程。</p></div>
+   <div class="card"><h4>三堂會一路做它</h4><p>B1 畫藍圖 → B2 設計介面 → B3 做出聊天機器人與測驗。</p></div>
+  </div>
+ </section>
+
+ <section class="slide" data-sec="產品定義" style="--accent:var(--green);--accent2:var(--cyan)">
+  <span class="kicker">STEP 2 · DEFINE · 產品定義書</span>
+  <h2>需求：產品定義一句話講清楚</h2>
+  <div class="barline"></div>
+  <div class="prompt">為 <em>目標使用者</em>，在 <em>使用情境</em> 中，解決 <em>核心問題</em>。<br>
+透過 <em>主要功能</em>，讓使用者達成 <em>可衡量成果</em>。<br><br>
+範例：為準備英檢與職場英文的學習者，提供每日 10 分鐘的 2000 高頻單字練習，讓他們能追蹤熟悉度並持續複習。</div>
+ </section>
+
+ <section class="slide" data-sec="User Story" style="--accent:var(--amber);--accent2:var(--violet)">
+  <span class="kicker">STEP 2 · DEFINE · User Story</span>
+  <h2>用 User Story 說清楚「誰、要什麼、為什麼」</h2>
+  <div class="barline"></div>
+  <div class="tpl">身為 <em>〈角色〉</em>，我想要 <em>〈做某件事〉</em>，以便 <em>〈得到某價值〉</em>。</div>
+  <ul class="list" style="margin-top:.7em">
+   <li>身為<b>上班族學習者</b>，我想要每天只練 20 個高頻單字，以便利用通勤零碎時間持續進步。</li>
+   <li>身為<b>準備英檢的人</b>，我想要系統自動把答錯的字排進複習，以便把時間花在還不熟的地方。</li>
+   <li>身為<b>想看到成效的使用者</b>，我想要看到熟悉度百分比，以便知道自己還差多少。</li>
+  </ul>
+  <p class="sub" style="margin-top:.6em">每個故事再補一句<b>驗收條件</b>：怎樣算完成？例：答錯的字，隔天一定出現在複習清單。</p>
+ </section>
+
+ <section class="slide" data-sec="功能規格表" style="--accent:var(--cyan);--accent2:var(--rose)">
+  <span class="kicker">STEP 2 · DEFINE · 功能規格表</span>
+  <h2>把故事拆成一張功能規格表</h2>
+  <div class="barline"></div>
+  <table class="tbl">
+   <tr><th>功能</th><th>使用者可以…</th><th>規則 / 狀態</th><th class="pri">優先</th></tr>
+   <tr><td>每日單字</td><td>看今天的 20 張單字卡</td><td>每天預設 20 字，可在設定調整</td><td class="pri">P0</td></tr>
+   <tr><td>測驗</td><td>做四選一、看即時對錯</td><td>答錯自動排進複習清單</td><td class="pri">P0</td></tr>
+   <tr><td>複習</td><td>重測錯題直到答對</td><td>連續答對 3 次 → 標記為熟悉</td><td class="pri">P1</td></tr>
+   <tr><td>進度</td><td>看已學 / 待複習 / 已熟悉數量</td><td>依狀態統計，每日更新</td><td class="pri">P1</td></tr>
+   <tr><td>設定</td><td>調整每日字數與提醒時間</td><td>每日字數範圍 10–50</td><td class="pri">P2</td></tr>
+  </table>
+  <p class="sub" style="margin-top:.5em">P0＝MVP 必做、P1＝接著做、P2＝有空再做。優先度讓你知道<b>先做什麼</b>。</p>
+ </section>
+
+ <section class="slide" data-sec="架構圖" style="--accent:var(--violet);--accent2:var(--green)">
+  <span class="kicker">STEP 3 · DESIGN · 架構圖</span>
+  <h2>設計：把 App 拆成三層架構</h2>
+  <div class="barline"></div>
+  <div class="arch">
+   <div class="layer top"><h4>畫面層　<span style="font-weight:400;color:#94a3b8;font-size:.7em">看得到、點得到的</span></h4><div class="tags"><span>首頁</span><span>單字卡</span><span>測驗頁</span><span>複習頁</span><span>進度頁</span><span>設定頁</span></div></div>
+   <div class="archv">▼ 使用者操作　　　▲ 畫面回應</div>
+   <div class="layer mid"><h4>邏輯層　<span style="font-weight:400;color:#94a3b8;font-size:.7em">背後的規則</span></h4><div class="tags"><span>每日選字</span><span>判斷對錯</span><span>錯題複習</span><span>更新熟悉度</span><span>統計進度</span></div></div>
+   <div class="archv">▼ 讀取 / 寫入　　　▲ 回傳資料</div>
+   <div class="layer bot"><h4>資料層　<span style="font-weight:400;color:#94a3b8;font-size:.7em">存起來的東西</span></h4><div class="tags"><span>單字</span><span>中文解釋</span><span>例句</span><span>程度</span><span>學習狀態</span><span>答題紀錄</span></div></div>
+  </div>
+ </section>
+
+ <section class="slide" data-sec="畫面示意" style="--accent:var(--rose);--accent2:var(--cyan)">
+  <span class="kicker">STEP 3 · DESIGN · 畫面示意圖</span>
+  <h2>先畫「示意圖」，把畫面與流程講清楚</h2>
+  <div class="barline"></div>
+  <div class="mocks">
+   <div class="phone">
+    <div class="notch"></div><div class="cap">單字卡</div>
+    <div class="scr">
+     <div class="dots"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div>
+     <div class="ui word"><span class="pos">v. 動詞</span><b>abandon</b><span class="ph">/əˈbæn.dən/</span><span class="zh">放棄；拋棄</span><span class="ex">Don't abandon your plan.</span></div>
+     <div class="row" style="margin-top:auto"><div class="btn ghost">還不熟</div><div class="btn">已熟悉</div></div>
+    </div>
+   </div>
+   <div class="phone">
+    <div class="notch"></div><div class="cap">小測驗</div>
+    <div class="scr">
+     <div class="q">「abandon」的意思是？</div>
+     <div class="ui opt ok">A　放棄</div>
+     <div class="ui opt">B　收集</div>
+     <div class="ui opt">C　建立</div>
+     <div class="ui opt">D　延遲</div>
+     <div class="btn" style="margin-top:auto">送出</div>
+    </div>
+   </div>
+   <div class="phone">
+    <div class="notch"></div><div class="cap">今日進度</div>
+    <div class="scr">
+     <div class="big">65%</div><div class="lbl">今天目標 20 字</div>
+     <div class="stat"><span>已學</span><span>13</span></div><div class="bar"><i style="width:65%"></i></div>
+     <div class="stat"><span>待複習</span><span>5</span></div><div class="bar"><i style="width:25%"></i></div>
+     <div class="stat"><span>已熟悉</span><span>8</span></div><div class="bar"><i style="width:40%"></i></div>
+    </div>
+   </div>
+  </div>
+  <p class="sub" style="margin-top:.6em">重點是<b>結構與流程</b>，不是美感——下一堂用 Stitch 才把它變成真的介面。</p>
+ </section>
+
+ <section class="slide" data-sec="素材清單" style="--accent:var(--green);--accent2:var(--amber)">
+  <span class="kicker">MATERIALS · 素材清單</span>
+  <h2>2000 單字素材怎麼取得？</h2>
+  <div class="barline"></div>
+  <ul class="list">
+   <li>字表：使用 NGSL 高頻英文字表，完整約 2800 字，第一版取前 2000 字。</li>
+   <li>欄位：整理成 CSV 或 JSON——單字、中文解釋、例句、詞性、級別。</li>
+   <li>補充：中文解釋與例句可請 AI 產生，但要抽樣校對，避免錯義或怪例句。</li>
+   <li>匯入：前端原型先用 JSON；正式產品再接資料庫或後台管理。</li>
+  </ul>
+ </section>
+
+ <section class="slide" data-sec="開發藍圖" style="--accent:var(--violet);--accent2:var(--green)">
+  <span class="kicker">THE BLUEPRINT</span>
+  <h2>把所有文件，收成一份「開發藍圖」</h2>
+  <div class="barline"></div>
+  <div class="grid">
+   <div class="card"><h4>產品定義書</h4><p>一句話講清楚為誰、解決什麼問題。</p></div>
+   <div class="card"><h4>User Story</h4><p>主要使用者想做什麼、為了什麼價值。</p></div>
+   <div class="card"><h4>功能規格表</h4><p>功能、使用者可以…、規則、優先度。</p></div>
+   <div class="card"><h4>架構圖</h4><p>資料 / 邏輯 / 畫面三層怎麼分工。</p></div>
+   <div class="card"><h4>畫面示意圖</h4><p>主要頁面的樣子與操作流程。</p></div>
+   <div class="card"><h4>素材清單 & 範圍</h4><p>資料來源，加上 MVP 先做 / 先不做。</p></div>
+  </div>
+  <p class="sub" style="margin-top:.7em">這份藍圖就是今天真正的交付物——<b>B2、B3 都會回來翻它。</b></p>
+ </section>
+
+ <section class="slide" data-sec="6 格框架" style="--accent:var(--green);--accent2:var(--violet)">
+  <span class="kicker">ASKING FRAMEWORK</span>
+  <h2>方法論收斂：問 AI 前先填 6 格</h2>
+  <div class="barline"></div>
+  <div class="grid">
+   <div class="card"><h4>角色</h4><p>要 AI 扮演誰？產品經理、設計師、工程師、助教。</p></div>
+   <div class="card"><h4>目標</h4><p>最後要完成什麼？藍圖、規格表、流程圖、功能清單。</p></div>
+   <div class="card"><h4>受眾</h4><p>誰會使用或觀看？需求會因人而變。</p></div>
+   <div class="card"><h4>素材</h4><p>你已經有什麼？文字、圖片、連結、限制。</p></div>
+   <div class="card"><h4>限制</h4><p>時間、工具、版型、不能用什麼、必須包含什麼。</p></div>
+   <div class="card"><h4>輸出</h4><p>要 Markdown、表格、HTML，還是可執行檔案。</p></div>
+  </div>
+ </section>
+
+ <section class="slide" data-sec="檢查清單">
+  <span class="kicker">CHECKLIST</span>
+  <h2>今天的交付檢查清單</h2>
+  <div class="barline"></div>
+  <ul class="list">
+   <li>個人網站可公開展示：6 個區塊齊全、手機桌機都不跑版、連結能點。</li>
+   <li>說得出產品規劃、需求、設計三步各做了什麼。</li>
+   <li>2000 單字 App 有一句話產品定義，加上 3 條以上 User Story。</li>
+   <li>功能規格表寫好：功能、使用者可以…、規則、優先度。</li>
+   <li>畫出三層架構圖與主要畫面示意，收成一份開發藍圖。</li>
+  </ul>
+ </section>
+
+ <section class="slide" data-sec="結語">
+  <div class="split">
+   <div>
+    <span class="kicker">NEXT · B2</span>
+    <h2>會規劃的人，AI 才幫得上忙</h2>
+    <div class="barline"></div>
+    <p class="sub">今天你完成了網站，也拿到一份藍圖。下一堂，我們照 User Flow → 線框 → Stitch 的順序，把藍圖變成看得到、點得動的介面。</p>
+   </div>
+   <img class="portrait" src="leo.jpg" alt="劉冠麟">
+  </div>
+ </section>
+
+</main>
+<button class="nav prev" id="prev" aria-label="上一頁">‹</button>
+<button class="nav next" id="next" aria-label="下一頁">›</button>
+<nav class="coursenav" aria-label="課程系列">
+ <a class="cn link" href="../course/">INTRO<small>前置課</small></a>
+ <span class="cn cur">B1<small>8/4</small></span>
+ <span class="cn soon">B2<small>8/11</small></span>
+ <span class="cn soon">B3<small>8/18</small></span>
+</nav>
+<div class="footer"><strong id="sec">開場</strong><span id="count">1 / 20</span></div>
+<script>
+const slides=[...document.querySelectorAll('.slide')];
+let i=Number(location.hash.replace('#',''))-1;
+if(!Number.isInteger(i)||i<0||i>=slides.length)i=0;
+const prev=document.getElementById('prev'), next=document.getElementById('next');
+function show(n){
+ i=Math.max(0,Math.min(slides.length-1,n));
+ slides.forEach((s,idx)=>s.classList.toggle('active',idx===i));
+ document.getElementById('count').textContent=`${i+1} / ${slides.length}`;
+ document.getElementById('sec').textContent=slides[i].dataset.sec||'';
+ document.getElementById('progress').style.width=`${((i+1)/slides.length)*100}%`;
+ prev.disabled=i===0; next.disabled=i===slides.length-1;
+ history.replaceState(null,'',`#${i+1}`);
+}
+prev.onclick=()=>show(i-1); next.onclick=()=>show(i+1);
+addEventListener('keydown',e=>{if(['ArrowRight','PageDown',' '].includes(e.key))show(i+1); if(['ArrowLeft','PageUp'].includes(e.key))show(i-1);});
+show(i);
+</script>
+</body>
+</html>
