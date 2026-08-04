@@ -120,7 +120,29 @@
  .nav{position:fixed; top:50%; transform:translateY(-50%); width:48px; height:48px; border:0; border-radius:50%; background:var(--accent); color:#fff; font-size:25px; cursor:pointer; opacity:.55; z-index:10}
  .nav:hover{opacity:1}
  .prev{left:18px}.next{right:18px}
- @media print{body{overflow:auto}.slide{display:flex !important; position:relative; min-height:100vh; page-break-after:always}.footer,.progress,.nav{display:none}}
+ #sec{color:var(--accent); cursor:pointer; user-select:none}
+ #count{cursor:pointer; user-select:none; font-variant-numeric:tabular-nums}
+ #sec::after,#count::after{content:" ▾"; color:#94a3b8; font-size:.85em}
+ #sec:hover,#count:hover{opacity:.7}
+ .hint{position:fixed; right:16px; bottom:56px; font-size:12.5px; color:#94a3b8; z-index:7; background:rgba(255,255,255,.85); padding:6px 12px; border-radius:999px; border:1px solid var(--line); transition:opacity .5s ease}
+ .chapmenu{position:fixed; left:12px; bottom:54px; z-index:11; background:#fff; border:1px solid var(--line); border-radius:12px; box-shadow:0 12px 40px rgba(15,23,42,.28); padding:8px; display:none; min-width:230px; max-height:70vh; overflow:auto}
+ .chapmenu.open{display:block}
+ .chapmenu button{display:flex; justify-content:space-between; gap:18px; width:100%; text-align:left; border:none; background:none; padding:9px 12px; border-radius:8px; cursor:pointer; font-size:15px; font-family:inherit; color:var(--ink)}
+ .chapmenu button:hover{background:#f1f5f9}
+ .chapmenu button.cur{color:var(--accent); font-weight:800}
+ .chapmenu button .pg{color:#94a3b8; font-variant-numeric:tabular-nums}
+ .overlay{position:fixed; inset:0; z-index:12; background:rgba(15,23,42,.74); backdrop-filter:blur(4px); display:none; padding:4vh 4vw 6vh; overflow:auto}
+ .overlay.open{display:block}
+ .ov-head{display:flex; justify-content:space-between; align-items:center; color:#fff; margin-bottom:8px}
+ .ov-head h3{font-size:clamp(18px,2.2vw,24px)}
+ .ov-close{border:none; background:rgba(255,255,255,.16); color:#fff; width:40px; height:40px; border-radius:50%; cursor:pointer; font-size:20px}
+ .ov-sec{color:#cbd5e1; font-weight:800; font-size:14px; letter-spacing:1px; margin:18px 0 8px}
+ .ov-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:10px}
+ .ov-item{display:flex; gap:10px; align-items:flex-start; text-align:left; cursor:pointer; background:#fff; border:2px solid transparent; border-radius:10px; padding:10px 12px; font-family:inherit; color:var(--ink); font-size:14px; line-height:1.35}
+ .ov-item:hover{border-color:#a855f7}
+ .ov-item.cur{outline:3px solid #4ade80; border-color:transparent}
+ .ov-item .pg{font-weight:800; color:#64748b; font-variant-numeric:tabular-nums; min-width:1.7em}
+ @media print{body{overflow:auto}.slide{display:flex !important; position:relative; min-height:100vh; page-break-after:always}.footer,.progress,.nav,.hint,.chapmenu,.overlay{display:none}}
 </style>
 </head>
 <body>
@@ -404,23 +426,72 @@
 </main>
 <button class="nav prev" id="prev" aria-label="上一頁">‹</button>
 <button class="nav next" id="next" aria-label="下一頁">›</button>
-<div class="footer"><strong id="sec">開場</strong><span id="count">1 / 20</span></div>
+<div class="hint" id="hint">← → · 滾輪換頁 · 點章節名或頁碼可跳頁 · F 全螢幕</div>
+<div class="footer"><strong id="sec" title="點我跳章節">開場</strong><span id="count" title="點我看全部頁面">1 / 20</span></div>
+<div class="chapmenu" id="chapmenu"></div>
+<div class="overlay" id="overlay">
+ <div class="ov-head"><h3>跳到頁面 / 章節</h3><button class="ov-close" id="ovClose" aria-label="關閉">✕</button></div>
+ <div id="ovBody"></div>
+</div>
 <script>
 const slides=[...document.querySelectorAll('.slide')];
+const total=slides.length;
+const progress=document.getElementById('progress');
+const secEl=document.getElementById('sec');
+const countEl=document.getElementById('count');
+const prevBtn=document.getElementById('prev');
+const nextBtn=document.getElementById('next');
+const hint=document.getElementById('hint');
+const chapmenu=document.getElementById('chapmenu');
+const overlay=document.getElementById('overlay');
+const ovBody=document.getElementById('ovBody');
+const ovClose=document.getElementById('ovClose');
 let i=Number(location.hash.replace('#',''))-1;
-if(!Number.isInteger(i)||i<0||i>=slides.length)i=0;
-const prev=document.getElementById('prev'), next=document.getElementById('next');
+if(!Number.isInteger(i)||i<0||i>=total)i=0;
+function slideTitle(s){const h=s.querySelector('h2, h1');return h?h.textContent.trim():(s.dataset.sec||'（無標題）');}
+const chapters=[];
+slides.forEach((s,idx)=>{const sec=s.dataset.sec||'';const last=chapters[chapters.length-1];if(!last||last.sec!==sec)chapters.push({sec,start:idx});});
+chapters.forEach(c=>{const b=document.createElement('button');b.dataset.idx=c.start;b.innerHTML='<span>'+c.sec+'</span><span class="pg">p.'+(c.start+1)+'</span>';b.addEventListener('click',()=>{show(c.start);closeMenus();});chapmenu.appendChild(b);});
+chapters.forEach((c,ci)=>{const end=(ci+1<chapters.length)?chapters[ci+1].start:total;const h=document.createElement('div');h.className='ov-sec';h.textContent=c.sec;ovBody.appendChild(h);const grid=document.createElement('div');grid.className='ov-grid';for(let k=c.start;k<end;k++){const it=document.createElement('button');it.className='ov-item';it.dataset.idx=k;it.innerHTML='<span class="pg">'+(k+1)+'</span><span>'+slideTitle(slides[k])+'</span>';it.addEventListener('click',()=>{show(k);closeMenus();});grid.appendChild(it);}ovBody.appendChild(grid);});
+function currentChapterStart(){let start=0;chapters.forEach(c=>{if(c.start<=i)start=c.start;});return start;}
+function markCurrent(){const cs=currentChapterStart();chapmenu.querySelectorAll('button').forEach(b=>b.classList.toggle('cur',+b.dataset.idx===cs));ovBody.querySelectorAll('.ov-item').forEach(b=>b.classList.toggle('cur',+b.dataset.idx===i));}
+function closeMenus(){chapmenu.classList.remove('open');overlay.classList.remove('open');}
 function show(n){
- i=Math.max(0,Math.min(slides.length-1,n));
- slides.forEach((s,idx)=>s.classList.toggle('active',idx===i));
- document.getElementById('count').textContent=`${i+1} / ${slides.length}`;
- document.getElementById('sec').textContent=slides[i].dataset.sec||'';
- document.getElementById('progress').style.width=`${((i+1)/slides.length)*100}%`;
- prev.disabled=i===0; next.disabled=i===slides.length-1;
- history.replaceState(null,'',`#${i+1}`);
+ i=Math.max(0,Math.min(total-1,n));
+ slides.forEach((s,k)=>s.classList.toggle('active',k===i));
+ countEl.textContent=(i+1)+' / '+total;
+ secEl.textContent=slides[i].dataset.sec||'';
+ progress.style.width=((i+1)/total*100)+'%';
+ prevBtn.disabled=(i===0); nextBtn.disabled=(i===total-1);
+ markCurrent();
+ history.replaceState(null,'','#'+(i+1));
 }
-prev.onclick=()=>show(i-1); next.onclick=()=>show(i+1);
-addEventListener('keydown',e=>{if(['ArrowRight','PageDown',' '].includes(e.key))show(i+1); if(['ArrowLeft','PageUp'].includes(e.key))show(i-1);});
+function next(){show(i+1);} function prev(){show(i-1);}
+prevBtn.addEventListener('click',e=>{e.stopPropagation();prev();});
+nextBtn.addEventListener('click',e=>{e.stopPropagation();next();});
+secEl.addEventListener('click',e=>{e.stopPropagation();overlay.classList.remove('open');markCurrent();chapmenu.classList.toggle('open');});
+countEl.addEventListener('click',e=>{e.stopPropagation();chapmenu.classList.remove('open');markCurrent();overlay.classList.toggle('open');});
+ovClose.addEventListener('click',closeMenus);
+overlay.addEventListener('click',e=>{if(e.target===overlay)closeMenus();});
+document.addEventListener('click',e=>{if(chapmenu.classList.contains('open')&&!chapmenu.contains(e.target)&&e.target!==secEl){chapmenu.classList.remove('open');}});
+document.addEventListener('keydown',e=>{
+ if(['ArrowRight','ArrowDown','PageDown',' '].includes(e.key)){e.preventDefault();next();}
+ else if(['ArrowLeft','ArrowUp','PageUp','Backspace'].includes(e.key)){e.preventDefault();prev();}
+ else if(e.key==='Home'){show(0);}
+ else if(e.key==='End'){show(total-1);}
+ else if(e.key==='f'||e.key==='F'){if(!document.fullscreenElement){document.documentElement.requestFullscreen();}else{document.exitFullscreen();}}
+ else if(e.key==='o'||e.key==='O'){chapmenu.classList.remove('open');markCurrent();overlay.classList.toggle('open');}
+ else if(e.key==='Escape'){closeMenus();}
+});
+let wheelLock=false;
+window.addEventListener('wheel',e=>{
+ if(wheelLock)return;
+ if(overlay.classList.contains('open')||chapmenu.classList.contains('open'))return;
+ if(Math.abs(e.deltaY)<12)return;
+ wheelLock=true; setTimeout(()=>{wheelLock=false;},450);
+ (e.deltaY>0)?next():prev();
+},{passive:true});
+if(hint){setTimeout(()=>{hint.style.opacity='0';},4000);}
 show(i);
 </script>
 </body>
