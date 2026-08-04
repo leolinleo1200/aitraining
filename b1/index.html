@@ -115,22 +115,12 @@
  .list li{list-style:none; padding-left:1.35em; position:relative}
  .list li:before{content:""; position:absolute; left:0; top:.6em; width:.55em; height:.55em; border-radius:50%; background:var(--accent)}
  code{background:#eef2f7; border:1px solid var(--line); border-radius:5px; padding:1px 7px; font-family:"Cascadia Code",Consolas,monospace; font-size:.9em; color:#0f172a}
- .coursenav{position:fixed; left:0; right:0; bottom:46px; z-index:8; display:flex; justify-content:center; align-items:stretch; gap:8px; padding:6px 10px; background:rgba(255,255,255,.9); backdrop-filter:blur(6px); border-top:1px solid var(--line)}
- .cn{display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:13px; font-weight:800; text-decoration:none; line-height:1.15; padding:3px 15px; border-radius:10px; border:1px solid var(--line); color:#64748b; background:#fff; white-space:nowrap}
- .cn small{font-size:10px; font-weight:700; color:#94a3b8; letter-spacing:.3px; margin-top:1px}
- .cn.cur{background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#fff; border-color:transparent}
- .cn.cur small{color:rgba(255,255,255,.85)}
- .cn.link{color:var(--accent); border-color:var(--accent)}
- .cn.link:hover{background:var(--accent); color:#fff}
- .cn.link:hover small{color:rgba(255,255,255,.85)}
- .cn.soon{opacity:.45; cursor:default}
- @media (max-width:560px){.coursenav{gap:6px; padding:5px 6px}.cn{padding:3px 10px; font-size:12px}}
  .footer{position:fixed; left:0; right:0; bottom:0; height:46px; display:flex; align-items:center; justify-content:space-between; padding:0 18px; border-top:1px solid var(--line); background:rgba(255,255,255,.86); color:#64748b; z-index:8}
  .progress{position:fixed; left:0; top:0; height:5px; background:linear-gradient(90deg,var(--accent),var(--accent2)); z-index:9; transition:width .2s ease}
  .nav{position:fixed; top:50%; transform:translateY(-50%); width:48px; height:48px; border:0; border-radius:50%; background:var(--accent); color:#fff; font-size:25px; cursor:pointer; opacity:.55; z-index:10}
  .nav:hover{opacity:1}
  .prev{left:18px}.next{right:18px}
- @media print{body{overflow:auto}.slide{display:flex !important; position:relative; min-height:100vh; page-break-after:always}.footer,.progress,.nav,.coursenav{display:none}}
+ @media print{body{overflow:auto}.slide{display:flex !important; position:relative; min-height:100vh; page-break-after:always}.footer,.progress,.nav{display:none}}
 </style>
 </head>
 <body>
@@ -414,12 +404,6 @@
 </main>
 <button class="nav prev" id="prev" aria-label="上一頁">‹</button>
 <button class="nav next" id="next" aria-label="下一頁">›</button>
-<nav class="coursenav" aria-label="課程系列">
- <a class="cn link" href="../course/">INTRO<small>前置課</small></a>
- <span class="cn cur">B1<small>8/4</small></span>
- <span class="cn soon">B2<small>8/11</small></span>
- <span class="cn soon">B3<small>8/18</small></span>
-</nav>
 <div class="footer"><strong id="sec">開場</strong><span id="count">1 / 20</span></div>
 <script>
 const slides=[...document.querySelectorAll('.slide')];

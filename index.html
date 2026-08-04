@@ -41,6 +41,11 @@
  .card p{color:#cbd5e1; font-size:clamp(14px,1.8vw,18px); line-height:1.5}
  .card .go{display:inline-block; margin-top:1em; font-weight:800; color:var(--accentb)}
  .card .go::after{content:" →"}
+ .card .date{display:block; font-size:13px; font-weight:800; letter-spacing:1px; color:var(--accentb); margin:.2em 0 .1em}
+ .card .soontag{display:inline-block; margin-top:1em; font-weight:800; color:#94a3b8; border:1px dashed rgba(255,255,255,.3); padding:2px 12px; border-radius:999px; font-size:13px}
+ .card.soon{opacity:.6; cursor:default}
+ .card.soon:hover{transform:none; background:rgba(255,255,255,.05); box-shadow:none}
+ .sechead{margin-top:2.4em; color:#cbd5e1; font-weight:800; font-size:clamp(15px,2vw,19px); letter-spacing:1px}
  .foot{margin-top:2.6em; color:var(--muted); font-size:clamp(13px,1.6vw,16px); line-height:1.7}
  .foot a{color:#cbd5e1; text-decoration:none; border-bottom:1px solid rgba(255,255,255,.25)}
 </style>
@@ -57,17 +62,43 @@
  <span class="chip">🛠️ 動手實作</span>
  </div>
 
+ <p class="sechead">📚 課程投影片</p>
  <div class="cards">
  <a class="card" href="course/" style="--accent:var(--p1);--accentb:var(--p1b)">
- <div class="ico">📊</div>
- <h2>課程投影片</h2>
- <p>完整上課簡報：生成式 AI 觀念、CLI 入門、安裝 Antigravity CLI，到讓 Agent 讀檔、規劃、產生檔案的實作。</p>
+ <div class="ico">🚀</div>
+ <span class="date">前置課 · AI Agent 與 CLI 入門</span>
+ <h2>INTRO 入門課</h2>
+ <p>生成式 AI 觀念、CLI、安裝 Antigravity CLI，到讓 Agent 讀檔、規劃、產生檔案的實作。</p>
  <span class="go">進入投影片</span>
  </a>
+ <a class="card" href="b1/" style="--accent:var(--p2);--accentb:var(--p2b)">
+ <div class="ico">📐</div>
+ <span class="date">B1 · 8/4</span>
+ <h2>生成你的第一個應用程式（1）</h2>
+ <p>完成個人網站，看懂產品規劃流程，替 2000 單字 App 畫出開發藍圖。</p>
+ <span class="go">進入投影片</span>
+ </a>
+ <div class="card soon" style="--accent:var(--p1);--accentb:var(--p1b)">
+ <div class="ico">🎨</div>
+ <span class="date">B2 · 8/11</span>
+ <h2>生成你的第一個應用程式（2）</h2>
+ <p>User Flow → 線框 → Stitch 生介面，再用 Google AI Studio 試 AI 功能，做出互動原型。</p>
+ <span class="soontag">敬請期待</span>
+ </div>
+ <div class="card soon" style="--accent:var(--p4);--accentb:var(--p4b)">
+ <div class="ico">🤖</div>
+ <span class="date">B3 · 8/18</span>
+ <h2>AI 場景設計與實作</h2>
+ <p>單字教練聊天機器人指令 ＋ 英語教學測驗，接上 LiveAI Learning。</p>
+ <span class="soontag">敬請期待</span>
+ </div>
+ </div>
+ <p class="sechead">🌐 示範作品站</p>
+ <div class="cards">
  <a class="card" href="https://leolinleo1200.github.io/myportfolio/" target="_blank" rel="noopener" style="--accent:var(--p4);--accentb:var(--p4b)">
  <div class="ico">🌐</div>
- <h2>示範作品站</h2>
- <p>LEO ｜ Senior Product Manager Portfolio——用 <b>agy</b> 產生、GitHub Pages 上線的成果，就是課後作業「自我介紹網站」的示範。</p>
+ <h2>Portfolio 範例站</h2>
+ <p>LEO ｜ Senior Product Manager Portfolio——用 <b>agy</b> 產生、GitHub Pages 上線，就是「自我介紹網站」的示範。</p>
  <span class="go">看示範站</span>
  </a>
  </div>
