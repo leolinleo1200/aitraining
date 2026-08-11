@@ -46,8 +46,11 @@
 
  .stage.pr{background:#0b1220; border:1px solid #0b1220; border-top:5px solid #38bdf8; border-radius:12px; padding:14px 16px}
  .stage.pr .lab{color:#7dd3fc}
- .stage.pr .ptext{color:#e2e8f0; font-family:"Cascadia Code",Consolas,monospace; font-size:12px; line-height:1.6}
- .stage.pr em{color:#7dd3fc; font-style:normal}
+ .stage.pr .ptext{color:#e2e8f0; font-size:12px; line-height:1.5}
+ .stage.pr .pl{display:flex; gap:8px; margin-bottom:9px}
+ .stage.pr .pl:last-child{margin-bottom:0}
+ .stage.pr .pl em{flex:0 0 auto; align-self:flex-start; color:#7dd3fc; font-style:normal; font-weight:800; background:rgba(56,189,248,.15); border:1px solid rgba(56,189,248,.32); padding:2px 9px; border-radius:6px; font-size:10.5px; white-space:nowrap}
+ .stage.pr .pl span{flex:1}
 
  .stage.ph{align-items:center; justify-content:flex-start}
  .stage.ph.wireHead .lab{color:var(--amber)}
@@ -182,7 +185,12 @@
   <div class="pipe">
    <div class="stage rq"><div class="lab">① 需求</div><p>一打開就看到今天要學什麼、進度到哪，一鍵開始或接續上次。</p></div>
    <div class="arrow">→</div>
-   <div class="stage pr"><div class="lab">② PROMPT</div><div class="ptext"><em>畫面：</em>App 首頁（手機）。<em>要做的事：</em>看今日進度、開始今天的單字、接續上次。<em>元素：</em>問候語、今日進度（已學/目標）、「開始今天的單字」主按鈕、「繼續上次」次按鈕、底部導覽。<em>風格：</em>乾淨、教育感、行動優先。</div></div>
+   <div class="stage pr"><div class="lab">② PROMPT</div><div class="ptext">
+    <div class="pl"><em>畫面</em><span>App 首頁（手機）</span></div>
+    <div class="pl"><em>要做的事</em><span>看今日進度、開始今天的單字、接續上次</span></div>
+    <div class="pl"><em>元素</em><span>問候語、今日進度（已學/目標）、「開始今天的單字」主按鈕、「繼續上次」次按鈕、底部導覽</span></div>
+    <div class="pl"><em>風格</em><span>乾淨、教育感、行動優先</span></div>
+   </div></div>
    <div class="arrow">→</div>
    <div class="stage ph wireHead"><div class="lab">③ 線稿</div>
     <div class="phone"><div class="scr"><div class="wf">
@@ -231,7 +239,12 @@
   <div class="pipe">
    <div class="stage rq"><div class="lab">① 需求</div><p>看單字、音標、詞性、中文與例句；兩顆按鈕標記熟悉度。</p></div>
    <div class="arrow">→</div>
-   <div class="stage pr"><div class="lab">② PROMPT</div><div class="ptext"><em>畫面：</em>單字卡頁（手機，依線框）。<em>要做的事：</em>看單字、翻卡看解釋、標記熟悉度。<em>元素：</em>單字、音標、詞性、中文解釋、例句、「還不熟／已熟悉」兩顆按鈕。<em>版位：</em>上進度、中卡片、下按鈕。</div></div>
+   <div class="stage pr"><div class="lab">② PROMPT</div><div class="ptext">
+    <div class="pl"><em>畫面</em><span>單字卡頁（手機，依線框）</span></div>
+    <div class="pl"><em>要做的事</em><span>看單字、翻卡看解釋、標記熟悉度</span></div>
+    <div class="pl"><em>元素</em><span>單字、音標、詞性、中文解釋、例句、「還不熟／已熟悉」兩顆按鈕</span></div>
+    <div class="pl"><em>版位</em><span>上進度、中卡片、下按鈕</span></div>
+   </div></div>
    <div class="arrow">→</div>
    <div class="stage ph wireHead"><div class="lab">③ 線稿</div>
     <div class="phone"><div class="scr"><div class="wf">
@@ -279,7 +292,12 @@
   <div class="pipe">
    <div class="stage rq"><div class="lab">① 需求</div><p>一次一題四選一，選完即時看對錯，再送出下一題。</p></div>
    <div class="arrow">→</div>
-   <div class="stage pr"><div class="lab">② PROMPT</div><div class="ptext"><em>畫面：</em>測驗頁（手機）。<em>要做的事：</em>讀題、四選一、送出看對錯。<em>元素：</em>題號進度、題目、四個選項、送出鍵、答對／答錯回饋色。<em>版位：</em>上題目、中選項、下送出。</div></div>
+   <div class="stage pr"><div class="lab">② PROMPT</div><div class="ptext">
+    <div class="pl"><em>畫面</em><span>測驗頁（手機）</span></div>
+    <div class="pl"><em>要做的事</em><span>讀題、四選一、送出看對錯</span></div>
+    <div class="pl"><em>元素</em><span>題號進度、題目、四個選項、送出鍵、答對／答錯回饋色</span></div>
+    <div class="pl"><em>版位</em><span>上題目、中選項、下送出</span></div>
+   </div></div>
    <div class="arrow">→</div>
    <div class="stage ph wireHead"><div class="lab">③ 線稿</div>
     <div class="phone"><div class="scr"><div class="wf">
@@ -319,7 +337,12 @@
   <div class="pipe">
    <div class="stage rq"><div class="lab">① 需求</div><p>集中列出答錯的字，可單題重測或全部重測。</p></div>
    <div class="arrow">→</div>
-   <div class="stage pr"><div class="lab">② PROMPT</div><div class="ptext"><em>畫面：</em>複習頁（手機）。<em>要做的事：</em>看錯題、重新測驗、記住的標為已熟悉。<em>元素：</em>待複習數量、錯題清單（單字＋中文）、每題「重測」、底部「全部重測」。<em>風格：</em>清單式、清爽。</div></div>
+   <div class="stage pr"><div class="lab">② PROMPT</div><div class="ptext">
+    <div class="pl"><em>畫面</em><span>複習頁（手機）</span></div>
+    <div class="pl"><em>要做的事</em><span>看錯題、重新測驗、記住的標為已熟悉</span></div>
+    <div class="pl"><em>元素</em><span>待複習數量、錯題清單（單字＋中文）、每題「重測」、底部「全部重測」</span></div>
+    <div class="pl"><em>風格</em><span>清單式、清爽</span></div>
+   </div></div>
    <div class="arrow">→</div>
    <div class="stage ph wireHead"><div class="lab">③ 線稿</div>
     <div class="phone"><div class="scr"><div class="wf">
@@ -360,7 +383,12 @@
   <div class="pipe">
    <div class="stage rq"><div class="lab">① 需求</div><p>一眼看到整體熟悉度，以及已學／待複習／已熟悉的數量。</p></div>
    <div class="arrow">→</div>
-   <div class="stage pr"><div class="lab">② PROMPT</div><div class="ptext"><em>畫面：</em>進度頁（手機）。<em>要做的事：</em>一眼掌握學習狀況。<em>元素：</em>整體熟悉度百分比、已學／待複習／已熟悉三個數字、本週學習天數。<em>風格：</em>資料清楚、有鼓勵感。</div></div>
+   <div class="stage pr"><div class="lab">② PROMPT</div><div class="ptext">
+    <div class="pl"><em>畫面</em><span>進度頁（手機）</span></div>
+    <div class="pl"><em>要做的事</em><span>一眼掌握學習狀況</span></div>
+    <div class="pl"><em>元素</em><span>整體熟悉度百分比、已學／待複習／已熟悉三個數字、本週學習天數</span></div>
+    <div class="pl"><em>風格</em><span>資料清楚、有鼓勵感</span></div>
+   </div></div>
    <div class="arrow">→</div>
    <div class="stage ph wireHead"><div class="lab">③ 線稿</div>
     <div class="phone"><div class="scr"><div class="wf">
@@ -406,7 +434,12 @@
   <div class="pipe">
    <div class="stage rq"><div class="lab">① 需求</div><p>調整每日字數、提醒時間、解釋語言與音效。</p></div>
    <div class="arrow">→</div>
-   <div class="stage pr"><div class="lab">② PROMPT</div><div class="ptext"><em>畫面：</em>設定頁（手機）。<em>要做的事：</em>調整學習設定。<em>元素：</em>每日字數、提醒時間、中／英解釋切換、音效開關，清單式排列。<em>風格：</em>標準設定頁、清爽。</div></div>
+   <div class="stage pr"><div class="lab">② PROMPT</div><div class="ptext">
+    <div class="pl"><em>畫面</em><span>設定頁（手機）</span></div>
+    <div class="pl"><em>要做的事</em><span>調整學習設定</span></div>
+    <div class="pl"><em>元素</em><span>每日字數、提醒時間、中／英解釋切換、音效開關，清單式排列</span></div>
+    <div class="pl"><em>風格</em><span>標準設定頁、清爽</span></div>
+   </div></div>
    <div class="arrow">→</div>
    <div class="stage ph wireHead"><div class="lab">③ 線稿</div>
     <div class="phone"><div class="scr"><div class="wf">
