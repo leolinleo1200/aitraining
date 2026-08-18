@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>B3 AI 場景設計與實作｜產業AI人才培訓</title>
+<style>
+ :root{
+ --violet:#6d28d9; --cyan:#0891b2; --green:#15803d; --amber:#d97706; --rose:#be123c;
+ --ink:#172033; --muted:#65748b; --line:#d9e2ef; --paper:#f7fafc; --white:#fff;
+ --accent:var(--green); --accent2:var(--cyan);
+ }
+ *{box-sizing:border-box;margin:0;padding:0}
+ html,body{height:100%}
+ body{
+ font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","PingFang TC","Microsoft JhengHei",Arial,sans-serif;
+ color:var(--ink); background:#0b1220; overflow:hidden;
+ }
+ .deck{position:fixed; inset:0}
+ .slide{
+ position:absolute; inset:0; display:none; flex-direction:column; justify-content:center;
+ padding:6vh 8vw 10vh; background:var(--paper); animation:fade .25s ease;
+ }
+ .slide.active{display:flex}
+ @keyframes fade{from{opacity:.4; transform:translateY(10px)} to{opacity:1; transform:none}}
+ h1{font-size:clamp(34px,6.4vw,76px); line-height:1.08}
+ h2{font-size:clamp(28px,4.4vw,52px); line-height:1.14; margin-bottom:.45em}
+ h3{font-size:clamp(19px,2.2vw,27px); color:var(--muted); font-weight:700}
+ p,li{font-size:clamp(17px,2vw,25px); line-height:1.5}
+ b{color:var(--accent)}
+ .kicker{font-size:clamp(13px,1.3vw,16px); font-weight:900; color:var(--accent); letter-spacing:2px; margin-bottom:.85em}
+ .barline{width:74px; height:7px; border-radius:999px; margin:.15em 0 1em; background:linear-gradient(90deg,var(--accent),var(--accent2))}
+ .sub{color:var(--muted)}
+ .cover{
+ background:linear-gradient(135deg,rgba(11,18,32,.86),rgba(12,74,110,.78)), url("mcuai.jpg") center/cover;
+ color:#fff; justify-content:flex-end;
+ }
+ .cover h1{max-width:980px}
+ .cover .meta{font-size:clamp(17px,2.1vw,26px); color:#dbeafe; margin-top:1em; max-width:900px}
+ .badge{display:inline-block; width:max-content; padding:8px 15px; border-radius:999px; border:1px solid rgba(255,255,255,.28); background:rgba(255,255,255,.14); font-weight:900; margin-bottom:1.2em}
+ .chips{display:flex; flex-wrap:wrap; gap:10px; margin-top:1.4em}
+ .chip{padding:8px 14px; border-radius:10px; background:rgba(255,255,255,.13); border:1px solid rgba(255,255,255,.2); font-size:clamp(14px,1.6vw,18px)}
+ .exlink{display:inline-flex; align-items:center; gap:10px; width:max-content; margin-top:1.1em; padding:13px 24px; border-radius:12px; background:var(--accent); color:#fff; font-weight:900; text-decoration:none; font-size:clamp(15px,1.8vw,21px); box-shadow:0 14px 30px -14px var(--accent)}
+ .exlink:hover{filter:brightness(1.07)}
+ .exlink small{font-weight:700; opacity:.85; font-size:.72em}
+ .grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px}
+ .grid.two{grid-template-columns:repeat(2,1fr)}
+ @media (max-width:860px){.grid,.grid.two{grid-template-columns:1fr}}
+ .card{background:#fff; border:1px solid var(--line); border-top:6px solid var(--accent); border-radius:8px; padding:20px 22px}
+ .card h4{font-size:clamp(18px,2vw,25px); margin-bottom:.35em}
+ .card p,.card li{font-size:clamp(15px,1.65vw,20px); color:#334155}
+ .card .tag{display:inline-block; font-size:clamp(12px,1.2vw,15px); font-weight:900; color:var(--accent); letter-spacing:1px; margin-bottom:.3em}
+ .card.now{box-shadow:0 10px 30px -12px rgba(21,128,61,.5)}
+ .card.now .tag{background:var(--accent); color:#fff; padding:2px 10px; border-radius:999px}
+ .card.done{opacity:.72}
+ .numgrid{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:.4em}
+ @media (max-width:980px){.numgrid{grid-template-columns:repeat(2,1fr)}}
+ .num{background:#fff; border:1px solid var(--line); border-radius:8px; padding:18px}
+ .num strong{display:block; font-size:clamp(30px,4vw,48px); color:var(--accent); line-height:1}
+ .num span{display:block; margin-top:8px; font-size:clamp(15px,1.5vw,18px); color:#334155; line-height:1.35}
+ .timeline{display:grid; grid-template-columns:170px 1fr; gap:12px; align-items:start; margin-bottom:10px}
+ .time{font-weight:900; color:#fff; background:var(--accent); border-radius:8px; padding:9px 12px; text-align:center}
+ .thing{border:1px solid var(--line); background:#fff; border-radius:8px; padding:10px 14px}
+ .thing p{font-size:clamp(15px,1.65vw,20px); color:#334155}
+ @media (max-width:760px){.timeline{grid-template-columns:1fr}.time{text-align:left}}
+ .prompt{background:#0b1220; color:#e2e8f0; border-radius:8px; padding:18px 20px; font-family:"Cascadia Code",Consolas,monospace; font-size:clamp(14px,1.6vw,20px); line-height:1.55}
+ .prompt em{color:#7dd3fc; font-style:normal}
+ .flow{display:grid; grid-template-columns:1fr auto 1fr auto 1fr; gap:10px; align-items:stretch; margin-top:.3em}
+ .flow .step{background:#fff; border:1px solid var(--line); border-top:6px solid var(--accent); border-radius:8px; padding:16px 18px}
+ .flow .step h4{font-size:clamp(17px,1.9vw,23px); margin-bottom:.3em}
+ .flow .step p{font-size:clamp(14px,1.55vw,18px); color:#334155}
+ .flow .arrow{display:flex; align-items:center; justify-content:center; font-size:28px; color:var(--accent); font-weight:900}
+ @media (max-width:860px){.flow{grid-template-columns:1fr}.flow .arrow{transform:rotate(90deg); height:24px}}
+ .split{display:grid; grid-template-columns:1.05fr .95fr; gap:34px; align-items:center}
+ @media (max-width:880px){.split{grid-template-columns:1fr}}
+ .portrait{width:100%; max-height:70vh; object-fit:contain; border-radius:8px; border:1px solid var(--line); background:#fff}
+ .list{display:flex; flex-direction:column; gap:.55em; margin-top:.4em}
+ .list li{list-style:none; padding-left:1.35em; position:relative}
+ .list li:before{content:""; position:absolute; left:0; top:.65em; width:.55em; height:.55em; border-radius:50%; background:var(--accent)}
+ code{background:#eef2f7; border:1px solid var(--line); border-radius:5px; padding:1px 7px; font-family:"Cascadia Code",Consolas,monospace; font-size:.9em; color:#0f172a}
+ .footer{position:fixed; left:0; right:0; bottom:0; height:46px; display:flex; align-items:center; justify-content:space-between; padding:0 18px; border-top:1px solid var(--line); background:rgba(255,255,255,.86); color:#64748b; z-index:8}
+ .progress{position:fixed; left:0; top:0; height:5px; background:linear-gradient(90deg,var(--accent),var(--accent2)); z-index:9; transition:width .2s ease}
+ .nav{position:fixed; top:50%; transform:translateY(-50%); width:48px; height:48px; border:0; border-radius:50%; background:var(--accent); color:#fff; font-size:25px; cursor:pointer; opacity:.55; z-index:10}
+ .nav:hover{opacity:1}
+ .prev{left:18px}.next{right:18px}
+ @media print{body{overflow:auto}.slide{display:flex !important; position:relative; min-height:100vh; page-break-after:always}.footer,.progress,.nav{display:none}}
+</style>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+<main class="deck" id="deck">
+
+ <section class="slide cover active" data-sec="開場">
+  <span class="badge">B3 · 2026/8/18（二）</span>
+  <h1>AI 場景設計與實作</h1>
+  <p class="meta">把原型變成會回應的產品：拿一把免費 API key，在 Google AI Studio 把單字教練 Bot 真的跑起來，做一組會判分的英語測驗，再接上 LiveAI Learning。</p>
+  <div class="chips"><span class="chip">場景設計</span><span class="chip">Google AI Studio</span><span class="chip">免費 API key</span><span class="chip">英語測驗</span><span class="chip">LiveAI Learning</span></div>
+ </section>
+
+ <section class="slide" data-sec="三堂地圖" style="--accent:var(--violet);--accent2:var(--cyan)">
+  <span class="kicker">COURSE MAP</span>
+  <h2>最後一堂：讓產品會互動</h2>
+  <div class="barline"></div>
+  <div class="grid">
+   <div class="card done"><span class="tag">B1 · 完成</span><h4>畫藍圖</h4><p>產品規劃、需求、架構，產出開發藍圖。</p></div>
+   <div class="card done"><span class="tag">B2 · 完成</span><h4>做介面</h4><p>用 Stitch 做出介面草稿與可點原型。</p></div>
+   <div class="card now"><span class="tag">B3 · 今天</span><h4>做實作</h4><p>拿免費 API key，把單字教練 Bot 真的跑起來，＋英語測驗，接上 LiveAI Learning。</p></div>
+  </div>
+  <p class="sub" style="margin-top:1em">走完今天，你手上就有一個<b>從規劃到實作的完整專案</b>。</p>
+ </section>
+
+ <section class="slide" data-sec="今日目標" style="--accent:var(--cyan);--accent2:var(--green)">
+  <span class="kicker">TODAY'S DELIVERABLES</span>
+  <h2>今天結束前，要交出什麼？</h2>
+  <div class="barline"></div>
+  <div class="numgrid">
+   <div class="num"><strong>1</strong><span>一支真的會回話的單字教練 Bot（在 AI Studio 跑起來）</span></div>
+   <div class="num"><strong>2</strong><span>屬於你自己的一把免費 Google API key</span></div>
+   <div class="num"><strong>3</strong><span>一組能出題、判分、給回饋的英語測驗</span></div>
+   <div class="num"><strong>4</strong><span>三堂成果收攏成可展示的作品集</span></div>
+  </div>
+ </section>
+
+ <section class="slide" data-sec="場景設計" style="--accent:var(--green);--accent2:var(--cyan)">
+  <span class="kicker">SCENARIO DESIGN</span>
+  <h2>什麼是「AI 場景設計」？</h2>
+  <div class="barline"></div>
+  <p class="sub" style="margin-bottom:.8em">不是問一個問題就結束，而是把 AI 放進一個「會持續使用的情境」，事先設定好它的角色、任務、規則與邊界。</p>
+  <div class="grid two">
+   <div class="card"><h4>角色</h4><p>它是誰？以什麼身分和使用者互動。</p></div>
+   <div class="card"><h4>任務</h4><p>它幫使用者完成什麼？服務目標是什麼。</p></div>
+   <div class="card"><h4>規則</h4><p>該怎麼回應、什麼時候糾正、什麼時候鼓勵。</p></div>
+   <div class="card"><h4>邊界</h4><p>不該做什麼、遇到不會的怎麼辦。</p></div>
+  </div>
+ </section>
+
+ <section class="slide" data-sec="Bot＝指令">
+  <span class="kicker">A BOT IS ITS PROMPT</span>
+  <h2>聊天機器人，九成看它的指令</h2>
+  <div class="barline"></div>
+  <p class="sub" style="margin-bottom:.8em">同一個 AI 模型，指令寫得好不好，決定它是專業教練還是答非所問。一份好的系統指令有五塊：</p>
+  <div class="grid">
+   <div class="card"><h4>角色</h4><p>它扮演誰、服務誰。</p></div>
+   <div class="card"><h4>目標</h4><p>每次互動要幫使用者達成什麼。</p></div>
+   <div class="card"><h4>語氣</h4><p>親切、簡短、鼓勵，還是嚴謹。</p></div>
+   <div class="card"><h4>規則</h4><p>怎麼教、怎麼糾錯、一次教多少。</p></div>
+   <div class="card"><h4>拒絕邊界</h4><p>不談無關的事、不確定就說不確定。</p></div>
+  </div>
+ </section>
+
+ <section class="slide" data-sec="定義 Bot" style="--accent:var(--cyan);--accent2:var(--amber)">
+  <span class="kicker">DEFINE THE BOT</span>
+  <h2>設計單字教練 Bot：先定角色與任務</h2>
+  <div class="barline"></div>
+  <div class="grid">
+   <div class="card"><h4>它是誰</h4><p>一位耐心的英文單字教練，服務準備英檢與職場英文的成人。</p></div>
+   <div class="card"><h4>它幫你做什麼</h4><p>帶你複習今天的單字、用它造句、糾正用法與搭配。</p></div>
+   <div class="card"><h4>它的個性</h4><p>鼓勵、簡短、多給例子，不長篇大論，不打擊信心。</p></div>
+  </div>
+ </section>
+
+ <section class="slide" data-sec="指令模板" style="--accent:var(--rose);--accent2:var(--violet)">
+  <span class="kicker">INSTRUCTION TEMPLATE</span>
+  <h2>指令規劃模板</h2>
+  <div class="barline"></div>
+  <div class="prompt"><em>角色：</em>你是一位耐心的英文單字教練，服務準備英檢與職場英文的成人學習者。<br>
+<em>目標：</em>幫使用者記住並會用今天的單字。<br>
+<em>互動規則：</em>一次只教一個單字；先給例句，再請對方造句；答對稱讚，答錯溫和糾正並再給一個例子。<br>
+<em>語氣：</em>親切、簡短、鼓勵；用繁體中文解釋，用英文示範。<br>
+<em>邊界：</em>只談英文學習；不確定時說不確定，不要編造。</div>
+  <a class="exlink" href="B3-example.html" target="_blank" rel="noopener">🔗 這份指令實際聊起來長怎樣？打開對照範例<small>　需求 → 系統指令 → 對話示範 → 調教</small></a>
+ </section>
+
+ <section class="slide" data-sec="上手實作" style="--accent:var(--rose);--accent2:var(--amber)">
+  <span class="kicker">FROM PAPER TO LIVE</span>
+  <h2>指令寫好了，現在讓它真的會回話</h2>
+  <div class="barline"></div>
+  <p class="sub" style="margin-bottom:.8em">到這裡，Bot 的指令都還在「紙上」。接下來用 <b>Google AI Studio</b>，不用寫程式、不用綁信用卡，免費把它跑起來。</p>
+  <div class="flow">
+   <div class="step"><h4>紙上</h4><p>你已經寫好角色、目標、規則、邊界的指令。</p></div>
+   <div class="arrow">→</div>
+   <div class="step"><h4>貼進去</h4><p>把指令貼進 Google AI Studio，選免費模型。</p></div>
+   <div class="arrow">→</div>
+   <div class="step"><h4>真的跑</h4><p>直接跟你的 Bot 對話，測、調、存起來。</p></div>
+  </div>
+ </section>
+
+ <section class="slide" data-sec="AI Studio" style="--accent:var(--cyan);--accent2:var(--violet)">
+  <span class="kicker">MEET GOOGLE AI STUDIO</span>
+  <h2>Google AI Studio 是什麼？</h2>
+  <div class="barline"></div>
+  <p class="sub" style="margin-bottom:.8em">Google 官方、開瀏覽器就能用的 AI 實驗場，背後接的是 Gemini，還附一把<b>免費 API key</b>。</p>
+  <div class="grid">
+   <div class="card"><h4>免費開始</h4><p>Google 帳號登入即可，不用綁信用卡，選 Gemini 3.6 Flash 就免費。</p></div>
+   <div class="card"><h4>貼指令就能玩</h4><p>左邊放系統指令、右邊直接對話，改一句、馬上看它的反應。</p></div>
+   <div class="card"><h4>之後能變產品</h4><p>調好的指令能存檔，還能一鍵拿到程式碼，接進自己的 App。</p></div>
+  </div>
+ </section>
+
+ <section class="slide" data-sec="拿 API Key" style="--accent:var(--green);--accent2:var(--cyan)">
+  <span class="kicker">GET YOUR FREE API KEY</span>
+  <h2>拿到你的免費 API key：3 步</h2>
+  <div class="barline"></div>
+  <div class="timeline"><div class="time">步驟 1</div><div class="thing"><p>開 <code>aistudio.google.com</code>，用你的 Google 帳號登入。</p></div></div>
+  <div class="timeline"><div class="time">步驟 2</div><div class="thing"><p>點左側「Get API key」→「Create API key」→ 選「<b>在新專案中建立（in a new project）</b>」。</p></div></div>
+  <div class="timeline"><div class="time">步驟 3</div><div class="thing"><p>它會自動幫你建好專案並產生 key，複製那串 key，收好、別外流。</p></div></div>
+  <p class="sub" style="margin-top:.9em"><b>免費額度</b>上課練習綽綽有餘、不用信用卡。提醒：免費版的對話可能被 Google 拿去改善產品，<b>別貼公司機密或個資</b>。</p>
+ </section>
+
+ <section class="slide" data-sec="跑起來" style="--accent:var(--violet);--accent2:var(--amber)">
+  <span class="kicker">RUN IT · 本機直接跑</span>
+  <h2>打開網頁、貼上 key，Bot 就動了</h2>
+  <div class="barline"></div>
+  <p class="sub" style="margin-bottom:.7em">本機執行、吃你自己的免費額度——不用安裝、不用 publish、不用信用卡。</p>
+  <div class="grid two">
+   <div class="card"><span class="tag">1 · 開檔案</span><h4>打開 B3-app.html</h4><p>用瀏覽器打開這個單檔網頁，本機就能跑。</p></div>
+   <div class="card"><span class="tag">2 · 貼 key</span><h4>填入免費金鑰</h4><p>貼上免費 API key（新版 AQ. 開頭），選 Gemini 3.6 Flash。</p></div>
+   <div class="card"><span class="tag">3 · 開聊</span><h4>按「開始上課」</h4><p>教練先出第一個字，或直接丟一句 abandon 造句。</p></div>
+   <div class="card"><span class="tag">4 · 改個性</span><h4>改中間的指令</h4><p>改系統指令、按重新開始——同模型、換指令、變不同 Bot。</p></div>
+  </div>
+  <a class="exlink" href="B3-app.html" target="_blank" rel="noopener">🔗 打開本機實作：填 key 就能跑的單字教練<small>　B3-app.html · 純本機 · 免費</small></a>
+ </section>
+
+ <section class="slide" data-sec="可貼 Prompt" style="--accent:var(--cyan);--accent2:var(--green)">
+  <span class="kicker">PROMPT 範例 · 直接貼進 AI Studio</span>
+  <h2>四個可以直接貼進 AI Studio 的 prompt</h2>
+  <div class="barline"></div>
+  <p class="sub" style="margin-bottom:.5em">拿到 key、選好 Gemini 3.6 Flash 後，下面四個直接複製進 Google AI Studio 跑跑看；順了，就是你 Bot 的雛形。</p>
+  <div class="grid two">
+   <div class="prompt"><em>① 生 Bot 系統指令：</em>幫我寫一個「英文單字教練」的系統指令，包含角色、目標、互動規則（一次一字、先例句再造句）、語氣、拒絕邊界；對象是準備英檢的成人。</div>
+   <div class="prompt"><em>② 出一組測驗題：</em>根據 abandon、benefit、accurate 各出 1 題四選一中文選擇題，附正解與 3 個合理誘答，用 JSON 回傳。</div>
+   <div class="prompt"><em>③ 批改造句：</em>我用 abandon 造句：「I abandon to study.」請指出錯在哪、給正確句，再給一個生活化例句，語氣鼓勵。</div>
+   <div class="prompt"><em>④ 幫 Bot 找碴：</em>這是我的 Bot 指令：<em>［貼上］</em>。請當刁鑽學員，設計 5 個會讓它出錯或越界的輸入，並指出指令要補哪些規則。</div>
+  </div>
+ </section>
+
+ <section class="slide" data-sec="教學技巧" style="--accent:var(--green);--accent2:var(--cyan)">
+  <span class="kicker">TEACHING TECHNIQUES</span>
+  <h2>讓 Bot 真的會教，幾個技巧</h2>
+  <div class="barline"></div>
+  <div class="grid">
+   <div class="card"><h4>循序漸進</h4><p>由易到難，先熟悉再進階，別一次丟一堆。</p></div>
+   <div class="card"><h4>給真實例句</h4><p>用生活與職場情境造句，比背解釋好記。</p></div>
+   <div class="card"><h4>即時糾錯</h4><p>指出錯在哪，並給出正確用法，不要只說「錯了」。</p></div>
+   <div class="card"><h4>控制難度</h4><p>依對方回答的程度，動態調整下一題深淺。</p></div>
+   <div class="card"><h4>正向回饋</h4><p>答對給肯定，讓人有動力繼續下一個。</p></div>
+   <div class="card"><h4>收斂範圍</h4><p>聚焦今天的單字，不岔題、不無限發散。</p></div>
+  </div>
+ </section>
+
+ <section class="slide" data-sec="測試調教" style="--accent:var(--amber);--accent2:var(--violet)">
+  <span class="kicker">TEST & TUNE</span>
+  <h2>測試與調教 Bot</h2>
+  <div class="barline"></div>
+  <p class="sub" style="margin-bottom:.8em">在 AI Studio 裡直接對你的 Bot「找碴」——好的 Bot 是測出來、改出來的。</p>
+  <ul class="list">
+   <li>給刁鑽輸入：答非所問、亂打字、故意拼錯，看它怎麼接。</li>
+   <li>試著讓它越界：問和英文無關的事，看它會不會被帶走。</li>
+   <li>檢查會不會編造：問它不確定的字義，看它敢不敢說不確定。</li>
+   <li>根據結果回頭改指令，迭代 2–3 次再定稿。</li>
+  </ul>
+ </section>
+
+ <section class="slide" data-sec="測驗題型" style="--accent:var(--cyan);--accent2:var(--rose)">
+  <span class="kicker">QUIZ · QUESTION TYPES</span>
+  <h2>英語教學測驗：先選題型</h2>
+  <div class="barline"></div>
+  <div class="grid two">
+   <div class="card"><h4>四選一</h4><p>認得字義。最快、最好判分，適合第一版。</p></div>
+   <div class="card"><h4>填空</h4><p>會拼、會在句子裡用，比選擇更扎實。</p></div>
+   <div class="card"><h4>句子重組</h4><p>練語序與搭配，檢查是否真的會用。</p></div>
+   <div class="card"><h4>聽力 / 口說</h4><p>進階題型，接發音與語音辨識，之後再加。</p></div>
+  </div>
+ </section>
+
+ <section class="slide" data-sec="測驗實作" style="--accent:var(--violet);--accent2:var(--green)">
+  <span class="kicker">BUILD THE QUIZ</span>
+  <h2>測驗實作：出題 → 判分 → 回饋</h2>
+  <div class="barline"></div>
+  <div class="flow">
+   <div class="step"><h4>出題</h4><p>從單字資料挑題，設定題數與難度，錯誤選項要合理。</p></div>
+   <div class="arrow">→</div>
+   <div class="step"><h4>判分</h4><p>即時判斷對錯，記錄錯題與作答時間。</p></div>
+   <div class="arrow">→</div>
+   <div class="step"><h4>回饋</h4><p>解釋為什麼錯、給正確用法，把錯題丟回複習。</p></div>
+  </div>
+  <p class="sub" style="margin-top:1em">這一組「出題 / 判分 / 回饋」的邏輯，正是 B1 藍圖裡的<b>「邏輯層」</b>。</p>
+ </section>
+
+ <section class="slide" data-sec="LiveAI" style="--accent:var(--green);--accent2:var(--amber)">
+  <span class="kicker">INTO LIVEAI LEARNING</span>
+  <h2>接上 LiveAI Learning</h2>
+  <div class="barline"></div>
+  <div class="grid">
+   <div class="card"><h4>它是什麼</h4><p>希伯崙自有的 AI 英語學習應用，本身就是真實產品場景。</p></div>
+   <div class="card"><h4>你的東西怎麼進去</h4><p>單字教練當學習夥伴，測驗當練習關卡，接進既有流程。</p></div>
+   <div class="card"><h4>為什麼重要</h4><p>從練習作品，變成能放進真實產品裡的內容——這就是職場價值。</p></div>
+  </div>
+ </section>
+
+ <section class="slide" data-sec="作品集" style="--accent:var(--violet);--accent2:var(--cyan)">
+  <span class="kicker">YOUR PORTFOLIO</span>
+  <h2>三堂成果，收攏成一個作品</h2>
+  <div class="barline"></div>
+  <div class="flow">
+   <div class="step"><h4>B1 產出</h4><p>個人網站 ＋ 2000 單字 App 開發藍圖。</p></div>
+   <div class="arrow">→</div>
+   <div class="step"><h4>B2 產出</h4><p>介面草稿 ＋ 可點的互動原型。</p></div>
+   <div class="arrow">→</div>
+   <div class="step"><h4>B3 產出</h4><p>會跑的單字教練 Bot ＋ 英語測驗。</p></div>
+  </div>
+  <p class="sub" style="margin-top:1em">串起來，就是一個<b>從規劃到實作</b>、能拿去面試展示的完整專案。</p>
+ </section>
+
+ <section class="slide" data-sec="檢查清單">
+  <span class="kicker">CHECKLIST</span>
+  <h2>今天的交付檢查清單</h2>
+  <div class="barline"></div>
+  <ul class="list">
+   <li>拿到自己的免費 Google API key，Bot 在 AI Studio 真的會回話。</li>
+   <li>Bot 指令五塊齊全：角色、目標、語氣、規則、邊界。</li>
+   <li>實測過至少一輪對話，並依結果調過一次指令。</li>
+   <li>測驗能出題、判分、給回饋，錯題會進複習。</li>
+   <li>說得出怎麼放進 LiveAI Learning，三堂成果整理成能展示的作品。</li>
+  </ul>
+ </section>
+
+ <section class="slide" data-sec="結語">
+  <div class="split">
+   <div>
+    <span class="kicker">WRAP-UP</span>
+    <h2>你已經走完「規劃 → 設計 → 實作」一整輪</h2>
+    <div class="barline"></div>
+    <p class="sub">AI 真正放大的，不是打字速度，是你的產品思維。帶著這套流程，下一個產品，你自己就能開。</p>
+   </div>
+   <img class="portrait" src="leo.jpg" alt="劉冠麟">
+  </div>
+ </section>
+
+</main>
+<button class="nav prev" id="prev" aria-label="上一頁">‹</button>
+<button class="nav next" id="next" aria-label="下一頁">›</button>
+<div class="footer"><strong id="sec">開場</strong><span id="count">1 / 20</span></div>
+<script>
+const slides=[...document.querySelectorAll('.slide')];
+let i=Number(location.hash.replace('#',''))-1;
+if(!Number.isInteger(i)||i<0||i>=slides.length)i=0;
+const prev=document.getElementById('prev'), next=document.getElementById('next');
+function show(n){
+ i=Math.max(0,Math.min(slides.length-1,n));
+ slides.forEach((s,idx)=>s.classList.toggle('active',idx===i));
+ document.getElementById('count').textContent=`${i+1} / ${slides.length}`;
+ document.getElementById('sec').textContent=slides[i].dataset.sec||'';
+ document.getElementById('progress').style.width=`${((i+1)/slides.length)*100}%`;
+ prev.disabled=i===0; next.disabled=i===slides.length-1;
+ history.replaceState(null,'',`#${i+1}`);
+}
+prev.onclick=()=>show(i-1); next.onclick=()=>show(i+1);
+addEventListener('keydown',e=>{if(['ArrowRight','PageDown',' '].includes(e.key))show(i+1); if(['ArrowLeft','PageUp'].includes(e.key))show(i-1);});
+show(i);
+</script>
+</body>
+</html>

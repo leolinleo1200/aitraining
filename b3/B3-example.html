@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>B3 範例：單字教練 Bot｜需求 → 系統指令 → 對話示範 → 調教</title>
+<style>
+ :root{
+  --violet:#6d28d9; --cyan:#0891b2; --green:#15803d; --amber:#d97706; --rose:#be123c;
+  --ink:#172033; --muted:#65748b; --line:#d9e2ef; --paper:#f7fafc;
+ }
+ *{box-sizing:border-box; margin:0; padding:0}
+ body{
+  font-family:-apple-system,BlinkMacSystemFont,"Noto Sans TC","PingFang TC","Microsoft JhengHei",Arial,sans-serif;
+  color:var(--ink); background:#eef2f7; line-height:1.5;
+ }
+ .wrap{max-width:1320px; margin:0 auto; padding:36px 28px 70px}
+
+ header.top{background:linear-gradient(135deg,#0b1220,#14532d); color:#fff; border-radius:16px; padding:30px 34px; margin-bottom:14px}
+ header.top .kicker{font-size:13px; font-weight:900; letter-spacing:2px; color:#86efac; margin-bottom:.6em}
+ header.top h1{font-size:clamp(24px,3.2vw,38px); line-height:1.15}
+ header.top p{color:#cbd5e1; margin-top:.7em; max-width:860px; font-size:clamp(15px,1.6vw,18px)}
+
+ .legend{display:flex; flex-wrap:wrap; gap:10px; margin:16px 0 26px}
+ .legend .step{flex:1 1 200px; background:#fff; border:1px solid var(--line); border-radius:12px; border-top:5px solid var(--c); padding:12px 16px}
+ .legend .step b{display:block; font-size:14px; color:var(--c); letter-spacing:1px}
+ .legend .step span{font-size:13px; color:#475569}
+
+ .row{background:#fff; border:1px solid var(--line); border-radius:16px; padding:20px 22px; margin-bottom:18px; box-shadow:0 10px 30px -22px rgba(2,8,20,.5)}
+ .rowhead{display:flex; align-items:center; gap:12px; margin-bottom:16px; flex-wrap:wrap}
+ .rowhead .idx{flex:0 0 auto; width:34px; height:34px; border-radius:50%; background:var(--a); color:#fff; font-weight:900; display:flex; align-items:center; justify-content:center; font-size:16px}
+ .rowhead h2{font-size:21px}
+ .rowhead p{color:var(--muted); font-size:14px}
+
+ .pipe{display:grid; grid-template-columns:1fr 20px 1.15fr 20px auto 20px 1fr; gap:10px; align-items:stretch}
+ .arrow{display:flex; align-items:center; justify-content:center; color:#94a3b8; font-weight:900; font-size:22px}
+ .stage{display:flex; flex-direction:column}
+ .lab{font-size:11px; font-weight:900; letter-spacing:1px; margin-bottom:9px}
+
+ .stage.rq{background:#fff; border:1px solid var(--line); border-top:5px solid var(--green); border-radius:12px; padding:14px 16px}
+ .stage.rq .lab{color:var(--green)}
+ .stage.rq p{font-size:13.5px; color:#334155}
+
+ .stage.pr{background:#0b1220; border:1px solid #0b1220; border-top:5px solid #4ade80; border-radius:12px; padding:14px 16px}
+ .stage.pr .lab{color:#86efac}
+ .stage.pr p{color:#e2e8f0; font-size:12.5px; line-height:1.55}
+ .stage.pr .r{color:#86efac; font-weight:800}
+
+ .stage.tn{background:#fffbeb; border:1px solid #fde68a; border-top:5px solid var(--amber); border-radius:12px; padding:14px 16px}
+ .stage.tn .lab{color:#b45309}
+ .stage.tn p{font-size:13px; color:#78350f}
+ .stage.tn .was{color:#a16207; font-weight:700}
+
+ .stage.ph{align-items:center; justify-content:flex-start}
+ .stage.ph .lab{color:var(--violet); align-self:flex-start}
+
+ /* 手機外框 + 聊天介面 */
+ .phone{width:196px; border:8px solid #0f1424; border-radius:30px; background:#0f1424; overflow:hidden;
+        box-shadow:0 24px 42px -20px rgba(2,8,20,.62), 0 6px 14px -8px rgba(2,8,20,.35)}
+ .scr{height:326px; background:#eef2f7; display:flex; flex-direction:column; overflow:hidden}
+ .sbar{height:20px; display:flex; align-items:center; justify-content:space-between; padding:0 13px; font-size:9px; font-weight:800; color:#0f172a; background:#eef2f7; flex:0 0 auto}
+ .sbar .bars{display:flex; align-items:center; gap:2px}
+ .sbar .bars b{width:2.5px; background:#0f172a; border-radius:1px; display:inline-block}
+ .sbar .bars b:nth-child(1){height:4px}.sbar .bars b:nth-child(2){height:6px}
+ .sbar .bars b:nth-child(3){height:8px}.sbar .bars b:nth-child(4){height:10px}
+ .sbar .bat{width:16px; height:8px; border:1.2px solid #0f172a; border-radius:2px; position:relative; margin-left:3px}
+ .sbar .bat::after{content:""; position:absolute; left:1px; top:1px; bottom:1px; width:10px; background:#0f172a; border-radius:1px}
+
+ .chead{background:linear-gradient(135deg,#15803d,#22c55e); color:#fff; padding:8px 11px; display:flex; align-items:center; gap:8px; flex:0 0 auto}
+ .chead .av{width:26px; height:26px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; font-size:13px}
+ .chead .t{font-weight:800; font-size:11px}
+ .chead .s{font-size:8px; opacity:.9}
+ .msgs{flex:1; display:flex; flex-direction:column; gap:6px; padding:10px; overflow:hidden}
+ .msgs .b, .msgs .u{max-width:84%; padding:7px 9px; font-size:9.5px; line-height:1.45}
+ .msgs .b{background:#fff; color:#1e293b; border-radius:12px 12px 12px 3px; box-shadow:0 3px 8px -6px rgba(15,23,42,.35); align-self:flex-start}
+ .msgs .u{background:#15803d; color:#fff; border-radius:12px 12px 3px 12px; align-self:flex-end}
+ .msgs em{color:#15803d; font-style:normal; font-weight:800}
+ .msgs .u em{color:#bbf7d0}
+ .cinput{background:#fff; border-top:1px solid #e5e9f0; padding:7px 9px; display:flex; align-items:center; gap:6px; flex:0 0 auto}
+ .cinput .box{flex:1; background:#f1f4f9; border-radius:99px; padding:5px 11px; font-size:8.5px; color:#9aa3b4}
+ .cinput .send{width:22px; height:22px; border-radius:50%; background:#15803d; color:#fff; display:flex; align-items:center; justify-content:center; font-size:11px}
+
+ .foot{color:var(--muted); font-size:13px; text-align:center; margin-top:26px}
+ .foot b{color:var(--ink)}
+
+ @media (max-width:1120px){
+  .pipe{grid-template-columns:1fr}
+  .arrow{transform:rotate(90deg); height:20px}
+ }
+ @media print{ body{background:#fff} .row{break-inside:avoid; box-shadow:none} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+ <header class="top">
+  <div class="kicker">B3 範例 · 單字教練 Bot</div>
+  <h1>一條規則，長出一種對話</h1>
+  <p>同一個「單字教練」Bot，把 <b>需求 → 系統指令 → 對話示範 → 調教</b> 走過五個教學情境。看懂這張表，你就知道指令裡每寫一條規則，Bot 實際聊起來會變成什麼樣。完整系統指令在投影片「指令模板」那頁。</p>
+ </header>
+
+ <div class="legend">
+  <div class="step" style="--c:var(--green)"><b>① 需求</b><span>這個情境要 Bot 做到什麼。</span></div>
+  <div class="step" style="--c:#16a34a"><b>② 系統指令</b><span>指令裡負責這件事的那條規則。</span></div>
+  <div class="step" style="--c:var(--violet)"><b>③ 對話示範</b><span>真的聊起來，會長這樣。</span></div>
+  <div class="step" style="--c:var(--amber)"><b>④ 調教</b><span>第一版哪裡不對、怎麼改。</span></div>
+ </div>
+
+ <!-- ① 認識新字 -->
+ <section class="row" style="--a:var(--green)">
+  <div class="rowhead"><span class="idx">1</span><h2>認識新字</h2><p>主動帶出今天的字，給音標、解釋、一個例句。</p></div>
+  <div class="pipe">
+   <div class="stage rq"><div class="lab">① 需求</div><p>Bot 主動開場，帶出今天第一個字，給音標＋中文＋一個生活例句，別一次丟太多。</p></div>
+   <div class="arrow">→</div>
+   <div class="stage pr"><div class="lab">② 系統指令</div><p><span class="r">互動規則</span>：一次只教一個字；先給「音標＋中文＋一句例句」，再邀請對方造句。</p></div>
+   <div class="arrow">→</div>
+   <div class="stage ph"><div class="lab">③ 對話示範</div>
+    <div class="phone"><div class="scr">
+     <div class="sbar"><span>9:41</span><span class="bars"><b></b><b></b><b></b><b></b><span class="bat"></span></span></div>
+     <div class="chead"><span class="av">📖</span><span><div class="t">單字教練</div><div class="s">Vocab Coach · 上線中</div></span></div>
+     <div class="msgs">
+      <div class="b">今天第一個字：<em>abandon</em> /əˈbæn.dən/，動詞，「放棄」。</div>
+      <div class="b">例句：Don't abandon your dream. 🌱</div>
+      <div class="b">換你用 abandon 造一個句子看看？</div>
+     </div>
+     <div class="cinput"><span class="box">輸入你的句子…</span><span class="send">➤</span></div>
+    </div></div>
+   </div>
+   <div class="arrow">→</div>
+   <div class="stage tn"><div class="lab">④ 調教</div><p><span class="was">第一版</span>一次丟 5 個字＋長解釋，很勸退。<br>加上「一次一個字、例句限一句」後才變清爽好跟。</p></div>
+  </div>
+ </section>
+
+ <!-- ② 答對稱讚 -->
+ <section class="row" style="--a:var(--cyan)">
+  <div class="rowhead"><span class="idx">2</span><h2>答對，稱讚＋延伸</h2><p>造句正確時肯定他，再多給一點點。</p></div>
+  <div class="pipe">
+   <div class="stage rq"><div class="lab">① 需求</div><p>使用者造句正確時，要具體稱讚，並順帶補一個搭配或用法，維持動力。</p></div>
+   <div class="arrow">→</div>
+   <div class="stage pr"><div class="lab">② 系統指令</div><p><span class="r">答對時</span>：先具體稱讚，再補一個搭配詞或延伸用法，不超過兩句。</p></div>
+   <div class="arrow">→</div>
+   <div class="stage ph"><div class="lab">③ 對話示範</div>
+    <div class="phone"><div class="scr">
+     <div class="sbar"><span>9:41</span><span class="bars"><b></b><b></b><b></b><b></b><span class="bat"></span></span></div>
+     <div class="chead"><span class="av">📖</span><span><div class="t">單字教練</div><div class="s">Vocab Coach · 上線中</div></span></div>
+     <div class="msgs">
+      <div class="u">I will never abandon my family.</div>
+      <div class="b">很棒 👏 句子完全正確！</div>
+      <div class="b">補充搭配：abandon a plan / abandon ship。要不要再挑戰一句？</div>
+     </div>
+     <div class="cinput"><span class="box">輸入你的句子…</span><span class="send">➤</span></div>
+    </div></div>
+   </div>
+   <div class="arrow">→</div>
+   <div class="stage tn"><div class="lab">④ 調教</div><p><span class="was">第一版</span>只回「正確」太乾。<br>要求「具體稱讚＋一個延伸」後，比較有教練的感覺。</p></div>
+  </div>
+ </section>
+
+ <!-- ③ 答錯溫和糾正 -->
+ <section class="row" style="--a:var(--rose)">
+  <div class="rowhead"><span class="idx">3</span><h2>答錯，溫和糾正</h2><p>指出錯在哪、給正確句、再給一個例句。</p></div>
+  <div class="pipe">
+   <div class="stage rq"><div class="lab">① 需求</div><p>使用者用錯時，不能只說「錯」，要指出問題、給正確版、再補一個例句，語氣不打擊。</p></div>
+   <div class="arrow">→</div>
+   <div class="stage pr"><div class="lab">② 系統指令</div><p><span class="r">答錯時</span>：①指出問題 ②給正確句 ③再給一個例句；先肯定再糾正。</p></div>
+   <div class="arrow">→</div>
+   <div class="stage ph"><div class="lab">③ 對話示範</div>
+    <div class="phone"><div class="scr">
+     <div class="sbar"><span>9:41</span><span class="bars"><b></b><b></b><b></b><b></b><span class="bat"></span></span></div>
+     <div class="chead"><span class="av">📖</span><span><div class="t">單字教練</div><div class="s">Vocab Coach · 上線中</div></span></div>
+     <div class="msgs">
+      <div class="u">I abandon to study yesterday.</div>
+      <div class="b">很接近了！abandon 後面接名詞或動名詞，不接 to。</div>
+      <div class="b">正確：I abandoned studying yesterday. 再試一句？</div>
+     </div>
+     <div class="cinput"><span class="box">輸入你的句子…</span><span class="send">➤</span></div>
+    </div></div>
+   </div>
+   <div class="arrow">→</div>
+   <div class="stage tn"><div class="lab">④ 調教</div><p><span class="was">第一版</span>直接說「文法錯誤」，很傷。<br>補「先肯定＋給正確句」規則後，學員比較不怕開口。</p></div>
+  </div>
+ </section>
+
+ <!-- ④ 守住邊界 -->
+ <section class="row" style="--a:var(--amber)">
+  <div class="rowhead"><span class="idx">4</span><h2>守住邊界</h2><p>問無關的事，禮貌婉拒並拉回學習。</p></div>
+  <div class="pipe">
+   <div class="stage rq"><div class="lab">① 需求</div><p>使用者問和英文無關的事，Bot 要禮貌說明範圍，把話題拉回單字，不被帶走。</p></div>
+   <div class="arrow">→</div>
+   <div class="stage pr"><div class="lab">② 系統指令</div><p><span class="r">拒絕邊界</span>：只談英文學習；遇到無關問題，禮貌說明範圍並邀回到單字。</p></div>
+   <div class="arrow">→</div>
+   <div class="stage ph"><div class="lab">③ 對話示範</div>
+    <div class="phone"><div class="scr">
+     <div class="sbar"><span>9:41</span><span class="bars"><b></b><b></b><b></b><b></b><span class="bat"></span></span></div>
+     <div class="chead"><span class="av">📖</span><span><div class="t">單字教練</div><div class="s">Vocab Coach · 上線中</div></span></div>
+     <div class="msgs">
+      <div class="u">幫我看今天台積電會不會漲？</div>
+      <div class="b">這我幫不上忙 😅 我是你的英文單字教練。</div>
+      <div class="b">要不要繼續剛剛的 abandon，還是換下一個字？</div>
+     </div>
+     <div class="cinput"><span class="box">輸入你的句子…</span><span class="send">➤</span></div>
+    </div></div>
+   </div>
+   <div class="arrow">→</div>
+   <div class="stage tn"><div class="lab">④ 調教</div><p><span class="was">沒設邊界前</span>它真的認真分析股票。<br>加上「拒絕邊界」規則後，才守得住、拉得回來。</p></div>
+  </div>
+ </section>
+
+ <!-- ⑤ 誠實說不確定 -->
+ <section class="row" style="--a:var(--violet)">
+  <div class="rowhead"><span class="idx">5</span><h2>誠實說不確定</h2><p>冷僻字不亂編，誠實並給替代方案。</p></div>
+  <div class="pipe">
+   <div class="stage rq"><div class="lab">① 需求</div><p>遇到冷僻或不確定的字，不能亂編意思，要誠實說不確定，並給一個替代做法。</p></div>
+   <div class="arrow">→</div>
+   <div class="stage pr"><div class="lab">② 系統指令</div><p><span class="r">誠實原則</span>：不確定時明說不確定、不編造；建議查證或改用有把握的字。</p></div>
+   <div class="arrow">→</div>
+   <div class="stage ph"><div class="lab">③ 對話示範</div>
+    <div class="phone"><div class="scr">
+     <div class="sbar"><span>9:41</span><span class="bars"><b></b><b></b><b></b><b></b><span class="bat"></span></span></div>
+     <div class="chead"><span class="av">📖</span><span><div class="t">單字教練</div><div class="s">Vocab Coach · 上線中</div></span></div>
+     <div class="msgs">
+      <div class="u">"flumadiddle" 是什麼意思？</div>
+      <div class="b">老實說這個字很少見，我不確定它的精準用法。</div>
+      <div class="b">建議查權威字典再用。要不要先練今天的核心單字？</div>
+     </div>
+     <div class="cinput"><span class="box">輸入你的句子…</span><span class="send">➤</span></div>
+    </div></div>
+   </div>
+   <div class="arrow">→</div>
+   <div class="stage tn"><div class="lab">④ 調教</div><p><span class="was">沒這條時</span>它會硬掰一個意思，很危險。<br>加「不確定就說不確定」後，避免誤導學員。</p></div>
+  </div>
+ </section>
+
+ <p class="foot">五個情境用的是<b>同一份系統指令</b>——差別只在你有沒有把那條規則寫進去。<b>對話為示意</b>，實際請把指令貼進 AI Studio／Gemini，用你的免費 API key 測測看。</p>
+
+</div>
+</body>
+</html>
