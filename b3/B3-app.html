@@ -76,7 +76,7 @@
  <div class="panel">
   <h2><span class="n">1</span>你的免費 API key</h2>
    <input id="key" type="password" placeholder="貼上 AI Studio 的免費金鑰（新版 AQ. 開頭）" autocomplete="off">
-  <p class="hint" style="margin-top:8px">模型固定用 <b>Gemini 3.6 Flash</b>（免費）；發音用瀏覽器內建朗讀，免額外設定。</p>
+  <p class="hint" style="margin-top:8px">模型固定用 <b>Gemini 3.6 Flash</b>（免費，額度約每分鐘 15 次／每天 1,500 次）；發音用瀏覽器內建朗讀，免額外設定。</p>
   <div class="rowline">
    <label style="margin:0"><input type="checkbox" id="remember"> 記住 key（只存在這台電腦的瀏覽器）</label>
    <span id="status"><span class="dot" id="dot"></span><span id="statusText">尚未填 key</span></span>
@@ -212,17 +212,35 @@ async function ask(userText){
   };
 
   try{
-    const res = await fetch(url, {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json', 'x-goog-api-key': key },  // 新版 AQ. key 要用 header 帶
-      body: JSON.stringify(body)
-    });
-    const data = await res.json();
+    let res, data, attempt = 0;
+    const maxTry = 3;
+    while (true){
+      attempt++;
+      res = await fetch(url, {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', 'x-goog-api-key': key },  // 新版 AQ. key 要用 header 帶
+        body: JSON.stringify(body)
+      });
+      data = await res.json();
+      if (res.ok) break;
+      // 503 伺服器忙線 / 429 額度：自動重試幾次
+      if ((res.status === 503 || res.status === 429) && attempt < maxTry){
+        thinking.textContent = `模型忙線中，自動重試 ${attempt}/${maxTry - 1}…`;
+        await new Promise(r => setTimeout(r, 1500 * attempt));
+        continue;
+      }
+      break;
+    }
     thinking.remove();
 
     if (!res.ok){
       const m = (data && data.error && data.error.message) || ('HTTP ' + res.status);
-      bubble('err', '出錯了：' + m + '\n（常見原因：key 錯、額度用完、或模型名稱不對）');
+      let hint;
+      if (res.status === 503) hint = '模型正忙（伺服器高負載，跟你的 key／額度無關），過幾秒再送一次就好。';
+      else if (res.status === 429) hint = '免費額度到頻率上限（每分鐘 15 次／每天 1,500 次），稍等一下再試。';
+      else if (res.status === 400 || res.status === 403) hint = 'key 可能不正確或未啟用，回上面重貼一次。';
+      else hint = '請稍後再試。';
+      bubble('err', '出錯了：' + m + '\n（' + hint + '）');
       history.pop();                 // 這輪失敗，把剛剛的 user 訊息移除
       return;
     }
